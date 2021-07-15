@@ -1662,7 +1662,6 @@ ORG game_data
     EQUB &8D: EQUS "TINS"
     EQUB &8D: EQUS "PANS"
     EQUB &8E: EQUS "COIN"
-    EQUB &8F: EQUS "OVEN"
 
     BRK
 ._noun_list_end
