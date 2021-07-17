@@ -9,24 +9,24 @@
    90*K.4BACK|M
   100stream_ptr=&70
   110loc=&5B80
-  130next_lt=&5F51
-  140cmdbuf=&900
-  150init_game=&5500
-  160select_room=&5503
-  170art_light=&5506
-  180disp_desc=&5509
-  190disp_exits=&550C
-  200list_objects=&550F
-  210get_cmd=&5512
-  220action_cmd=&5515
-  230inventory=&5518
-  240get_state_bit=&551B
-  250clear_state_bit=&551E
-  260set_state_bit=&5521
-  270select_msg=&5524
-  280select_sysmsg=&5527
-  290test_avail=&552A
-  300test_avail_X=&552D
+  120next_lt=&5F51
+  130cmdbuf=&900
+  140init_game=&5500
+  150select_room=&5503
+  160art_light=&5506
+  170disp_desc=&5509
+  180disp_exits=&550C
+  190list_objects=&550F
+  200get_cmd=&5512
+  210action_cmd=&5515
+  220inventory=&5518
+  230get_state_bit=&551B
+  240clear_state_bit=&551E
+  250set_state_bit=&5521
+  260select_msg=&5524
+  270select_sysmsg=&5527
+  280test_avail=&552A
+  290test_avail_X=&552D
  1000CLS
  1010CALLinit_game
  1020REPEAT
@@ -46,16 +46,18 @@
  1160IFR%=6ANDV%=10ANDD%=3PROCm(2)
  1170IFV%=13ANDN%=6ANDR%=1ANDFNb(7)=0ANDFNb(5)PROCm(18):E%=0:V%=0
  1180IFV%=13ANDN%=6ANDR%=1ANDFNb(7)<>0ANDFNb(5)PROCm(19):E%=0:V%=0
- 1190IFV%=17ANDN%=5THENV%=19
- 1200IFV%=17PROCopen
- 1210IFV%=18PROCclose
- 1220IFV%=19PROCsearch
- 1230IFV%=20PROCshake
- 1240IFV%=21PROCbend
- 1250IFV%=22PROCbake
- 1260IFV%=23PROCins
- 1270IFV%=24PROChelp
- 1280IFV%=15ANDN%=3ANDR%=8ANDloc?3=0ANDL%<>0PROCsb(11):loc?3=254:PROCm(4):V%=0
+ 1190IFV%=13ANDN%=15ANDR%<>2THENE%=7
+ 1200IFV%=13ANDN%=15ANDR%=2THENE%=9
+ 1210IFV%=17ANDN%=5THENV%=19
+ 1220IFV%=17PROCopen
+ 1230IFV%=18PROCclose
+ 1240IFV%=19PROCsearch
+ 1250IFV%=20PROCshake
+ 1260IFV%=21PROCbend
+ 1270IFV%=22PROCbake
+ 1280IFV%=23PROCins
+ 1290IFV%=24PROChelp
+ 1300IFV%=15ANDN%=3ANDR%=8ANDloc?3=0ANDL%<>0PROCsb(11):loc?3=254:PROCm(4):V%=0
  2000CALLaction_cmd
  2010IF?cmdbuf=81THENE%=10
  2020UNTILE%=10
@@ -87,37 +89,39 @@
  3240IFN%=5ANDR%=2ANDFNb(4)=0PROCm(11):loc?3=2:loc?4=2:PROCsb(4):E%=0
  3250IFN%=8ANDR%=3ANDFNb(6)THENE%=9
  3260IFN%=8ANDR%=3ANDFNb(6)=0PROCm(10):loc?14=R%:PROCsb(6):E%=0
- 3270ENDPROC
- 3280DEFPROCshake
- 3290E%=7:IFFNa THENE%=11
- 3300IFN%=9ANDFNa ANDFNb(9)=0PROCm(12):E%=0
- 3310ENDPROC
- 3320DEFPROCbend
- 3330E%=7:IFFNa THENE%=2
- 3340IFN%=9ANDFNa ANDFNb(9)=0PROCm(13):PROCsb(9):E%=0
- 3350ENDPROC
- 3360DEFPROCins
- 3370E%=7:IFFNa THENE%=2
- 3380IFN%=14ANDFNa AND(R%<>1ORFNb(5)=0)PRINT"There is nowhere suitable to insert it.":E%=0
- 3390IFN%=14ANDFNa ANDR%=1ANDFNb(5)PROCm(14):loc?14=254:PROCsb(7):E%=0
- 3400ENDPROC
- 3410DEFPROCbake
- 3420E%=2
- 3430IFR%<>2PRINT"You see no oven!":E%=0
- 3440IFR%=2ANDN%=4AND(FNh(4)=0ORFNh(7)=0ORFNh(13)=0)PROCm(15):E%=0
- 3450IFR%=2ANDN%=4ANDFNh(4)ANDFNh(7)ANDFNh(13)ANDFNb(7)=0PROCm(16):E%=0
- 3460IFR%=2ANDN%=4ANDFNh(4)ANDFNh(7)ANDFNh(13)ANDFNb(7)PROCm(17):E%=10
- 3470ENDPROC
- 3480DEFPROChelp
- 3490H%=0
- 3500IF(R%=1ANDFNb(5)=0ORR%=2ANDFNb(4)=0ORR%=3ANDFNb(6)=0)PRINT"Try SEARCHing something!":H%=1
- 3510IFL%=0PRINT"It's safe to go BACK.":H%=1
- 3520IFR%=8ANDFNb(11)=0ANDL%<>0PRINT"You could distract her with something.":H%=1
- 3530IF(R%=5ORR%=6)ANDFNb(9)=0PRINT"Don't worry about what you CAN'T do."'"Do the only thing you CAN do.":H%=1
- 3540IFR%=4PRINT"TAKE on its own will pick up the first"'"item found.":H%=1
- 3550IFH%=0PRINT"Try EXAMINEing things."
- 3560V%=0:E%=0
- 3570ENDPROC
+ 3270IFN%=15ANDR%<>2THENE%=7
+ 3280IFN%=15ANDR%=2THENE%=9
+ 3290ENDPROC
+ 3300DEFPROCshake
+ 3310E%=7:IFFNa THENE%=11
+ 3320IFN%=9ANDFNa ANDFNb(9)=0PROCm(12):E%=0
+ 3330ENDPROC
+ 3340DEFPROCbend
+ 3350E%=7:IFFNa THENE%=2
+ 3360IFN%=9ANDFNa ANDFNb(9)=0PROCm(13):PROCsb(9):E%=0
+ 3370ENDPROC
+ 3380DEFPROCins
+ 3390E%=7:IFFNa THENE%=2
+ 3400IFN%=14ANDFNa AND(R%<>1ORFNb(5)=0)PRINT"There is nowhere suitable to insert it.":E%=0
+ 3410IFN%=14ANDFNa ANDR%=1ANDFNb(5)PROCm(14):loc?14=254:PROCsb(7):E%=0
+ 3420ENDPROC
+ 3430DEFPROCbake
+ 3440E%=2
+ 3450IFR%<>2PRINT"You see no oven!":E%=0
+ 3460IFR%=2ANDN%=4AND(FNh(4)=0ORFNh(7)=0ORFNh(13)=0)PROCm(15):E%=0
+ 3470IFR%=2ANDN%=4ANDFNh(4)ANDFNh(7)ANDFNh(13)ANDFNb(7)=0PROCm(16):E%=0
+ 3480IFR%=2ANDN%=4ANDFNh(4)ANDFNh(7)ANDFNh(13)ANDFNb(7)PROCm(17):E%=10
+ 3490ENDPROC
+ 3500DEFPROChelp
+ 3510H%=0
+ 3520IF(R%=1ANDFNb(5)=0ORR%=2ANDFNb(4)=0ORR%=3ANDFNb(6)=0)PRINT"Try SEARCHing something!":H%=1
+ 3530IFL%=0PRINT"It's safe to go BACK.":H%=1
+ 3540IFR%=8ANDFNb(11)=0ANDL%<>0PRINT"You could distract her with something.":H%=1
+ 3550IF(R%=5ORR%=6)ANDFNb(9)=0PRINT"Don't worry about what you CAN'T do."'"Do the only thing you CAN do.":H%=1
+ 3560IFR%=4PRINT"TAKE on its own will pick up the first"'"item found.":H%=1
+ 3570IFH%=0PRINT"Try EXAMINEing things."
+ 3580V%=0:E%=0
+ 3590ENDPROC
  9990END
 10000DEFFNpeek(P%)
 10010Q%=!P%AND&FFFF:IFQ%>32767Q%=Q%OR&FFFF0000
