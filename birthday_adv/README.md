@@ -18,16 +18,30 @@ the expected format, you will need to run
 
 ```
 sqlite3 birthday.sqlite3 < birthday.s3t
-make_huffman_tree5 -qbirthday -w
-pack_database -qbirthday -obirthday_data.6502
+make_huffman_tree6 -qbirthday -w
+pack_database3 -qbirthday -obirthday_data.6502
+beebasm -i abengine3.6502 -di birthday_empty.ssd -do birthday_adv.ssd
 ```
 
-## abengine2.6502
+## abengine3.6502
 
 This is preconfigured to sit in memory just below the MODE 6 screen, because the
 game is small enough to fit there.  So it should run fine on an Acorn Electron.
+
+This version of the engine can store `EXAMINE` messages for objects either
+directly in with each object's record, or as a message number for the case
+where several objects  (or a stateful object in more than one state)  should
+display the same message when `EXAMINE`d.
 
 ## BIRTHDY
 
 This is the BASIC program providing the logic for the puzzles in the game.
 
+## birthday.s3t
+
+This is a text dump of the SQLite3 database which describes the rooms,
+objects and messages for _Birthday Adventure_.
+
+## abengine2.6502
+
+Old file.

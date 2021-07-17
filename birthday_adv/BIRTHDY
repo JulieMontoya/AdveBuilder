@@ -1,32 +1,32 @@
    10MODE7
-   15D%=0:E%=0:I%=0:M%=0:N%=0:R%=0:V%=0
-   20HIMEM=&4A00
-   30*L.M.ABENGIN
-   40*L.D.BIRTHDY
-   50*K.1HELP|M
-   60*K.2INV|M
-   70*K.3TAKE|M
-   80stream_ptr=&70
-   90loc=&5B80
-  100light=&5F01
-  110next_lt=&5F11
-  120cmdbuf=&900
-  130init_game=&5500
-  140select_room=&5503
-  150art_light=&5506
-  160disp_desc=&5509
-  170disp_exits=&550C
-  180list_objects=&550F
-  190get_cmd=&5512
-  200action_cmd=&5515
-  210inventory=&5518
-  220get_state_bit=&551B
-  230clear_state_bit=&551E
-  240set_state_bit=&5521
-  250select_msg=&5524
-  260select_sysmsg=&5527
-  270test_avail=&552A
-  280test_avail_X=&552D
+   20D%=0:E%=0:I%=0:L%=0:M%=0:N%=0:R%=0:V%=0
+   30HIMEM=&4900
+   40*L.M.ABENGIN
+   50*L.D.BIRTHDY
+   60*K.1HELP|M
+   70*K.2INV|M
+   80*K.3TAKE|M
+   90*K.4BACK|M
+  100stream_ptr=&70
+  110loc=&5B80
+  130next_lt=&5F51
+  140cmdbuf=&900
+  150init_game=&5500
+  160select_room=&5503
+  170art_light=&5506
+  180disp_desc=&5509
+  190disp_exits=&550C
+  200list_objects=&550F
+  210get_cmd=&5512
+  220action_cmd=&5515
+  230inventory=&5518
+  240get_state_bit=&551B
+  250clear_state_bit=&551E
+  260set_state_bit=&5521
+  270select_msg=&5524
+  280select_sysmsg=&5527
+  290test_avail=&552A
+  300test_avail_X=&552D
  1000CLS
  1010CALLinit_game
  1020REPEAT
@@ -37,25 +37,25 @@
  1070?&82=0
  1080W%=USRget_cmd
  1090IF?cmdbuf<33THENV%=12:E%=0
- 1100REMPRINT"V%=";V%;" M%=";M%;" N%=";N%;" E%=";E%;" NR=";D%;" I%=&";~I%
+ 1100REMPRINT"V%=";V%;" M%=";M%;" N%=";N%;" E%=";E%;" NR=";D%;" I%=&";~I%;" L%=";L%
  1110IFV%>0ANDV%<12AND(R%=1ANDD%=4ORR%=4ANDD%=1)PROCacid
  1120IFR%=8ANDV%=14PROChen
  1130IFV%>0ANDV%<12ANDD%=8ANDloc?1=0ANDFNb(1)PRINT"Something you are carrying won't fit!":V%=0
- 1140IF?light=0AND(V%>0ANDV%<11)PRINT"You stumble in the dark and break your"'"neck!":E%=10
- 1150IF?light=0ANDV%=11PRINT"You carefully retrace your steps back"'"into the light....."
- 1155IFR%=6ANDV%=10ANDD%=3PRINT"You fall down through the trapdoor and"'"land on a conveniently-positioned sofa."
- 1160IFV%=13ANDN%=6ANDR%=1ANDFNb(7)=0ANDFNb(5)PROCm(18):E%=0:V%=0
- 1170IFV%=13ANDN%=6ANDR%=1ANDFNb(7)<>0ANDFNb(5)PROCm(19):E%=0:V%=0
- 1180IFV%=17ANDN%=5THENV%=19
- 1190IFV%=17PROCopen
- 1200IFV%=18PROCclose
- 1210IFV%=19PROCsearch
- 1220IF?cmdbuf=81V%=0:E%=10
- 1230IFV%=21PROCbend
- 1240IFV%=22PROCbake
- 1250IFV%=23PROCins
- 1260IFV%=24PROChelp
- 1270IFV%=15ANDN%=3ANDR%=8ANDloc?3=0AND?light<>0PROCsb(11):loc?3=254:PRINT"The hen starts pecking greedily at the"'"bird seed.":V%=0
+ 1140IFL%=0AND(V%>0ANDV%<11)PROCm(3):E%=10
+ 1150IFL%=0ANDV%=11PROCm(1)
+ 1160IFR%=6ANDV%=10ANDD%=3PROCm(2)
+ 1170IFV%=13ANDN%=6ANDR%=1ANDFNb(7)=0ANDFNb(5)PROCm(18):E%=0:V%=0
+ 1180IFV%=13ANDN%=6ANDR%=1ANDFNb(7)<>0ANDFNb(5)PROCm(19):E%=0:V%=0
+ 1190IFV%=17ANDN%=5THENV%=19
+ 1200IFV%=17PROCopen
+ 1210IFV%=18PROCclose
+ 1220IFV%=19PROCsearch
+ 1230IFV%=20PROCshake
+ 1240IFV%=21PROCbend
+ 1250IFV%=22PROCbake
+ 1260IFV%=23PROCins
+ 1270IFV%=24PROChelp
+ 1280IFV%=15ANDN%=3ANDR%=8ANDloc?3=0ANDL%<>0PROCsb(11):loc?3=254:PROCm(4):V%=0
  2000CALLaction_cmd
  2010IF?cmdbuf=81THENE%=10
  2020UNTILE%=10
@@ -76,8 +76,8 @@
  3130IFN%=1ANDFNa ANDFNb(1)PROCcb(1):PRINT"You fold up the umbrella.":E%=0
  3140ENDPROC
  3150DEFPROChen
- 3160IF?light=0PROCm(8):E%=10
- 3170IF?light<>0ANDFNb(11)=0PROCm(7):V%=0
+ 3160IFL%=0PROCm(8):E%=10
+ 3170IFL%<>0ANDFNb(11)=0PROCm(7):V%=0
  3180ENDPROC
  3190DEFPROCsearch
  3200E%=7:IFFNa THENE%=9
@@ -90,11 +90,11 @@
  3270ENDPROC
  3280DEFPROCshake
  3290E%=7:IFFNa THENE%=11
- 3300IFN%=9ANDFNb(9)=0PROCm(12):E%=0
+ 3300IFN%=9ANDFNa ANDFNb(9)=0PROCm(12):E%=0
  3310ENDPROC
  3320DEFPROCbend
  3330E%=7:IFFNa THENE%=2
- 3340IFN%=9ANDFNb(9)=0PROCm(13):PROCsb(9):E%=0
+ 3340IFN%=9ANDFNa ANDFNb(9)=0PROCm(13):PROCsb(9):E%=0
  3350ENDPROC
  3360DEFPROCins
  3370E%=7:IFFNa THENE%=2
@@ -111,8 +111,8 @@
  3480DEFPROChelp
  3490H%=0
  3500IF(R%=1ANDFNb(5)=0ORR%=2ANDFNb(4)=0ORR%=3ANDFNb(6)=0)PRINT"Try SEARCHing something!":H%=1
- 3510IF?light=0PRINT"It's safe to go BACK.":H%=1
- 3520IFR%=8ANDFNb(11)=0AND?light<>0PRINT"You could distract her with something.":H%=1
+ 3510IFL%=0PRINT"It's safe to go BACK.":H%=1
+ 3520IFR%=8ANDFNb(11)=0ANDL%<>0PRINT"You could distract her with something.":H%=1
  3530IF(R%=5ORR%=6)ANDFNb(9)=0PRINT"Don't worry about what you CAN'T do."'"Do the only thing you CAN do.":H%=1
  3540IFR%=4PRINT"TAKE on its own will pick up the first"'"item found.":H%=1
  3550IFH%=0PRINT"Try EXAMINEing things."
