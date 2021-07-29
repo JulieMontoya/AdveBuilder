@@ -1,5 +1,5 @@
    10MODE7
-   20D%=0:E%=0:I%=0:L%=0:M%=0:N%=0:R%=0:V%=0
+   20D%=0:E%=0:I%=0:K%=0:L%=0:M%=0:N%=0:R%=0:V%=0
    30HIMEM=&4900
    40*L.M.ABENGIN
    50*L.D.BIRTHDY
@@ -8,25 +8,26 @@
    80*K.3TAKE|M
    90*K.4BACK|M
   100stream_ptr=&70
-  110loc=&5B80
-  120next_lt=&5F51
-  130cmdbuf=&900
-  140init_game=&5500
-  150select_room=&5503
-  160art_light=&5506
-  170disp_desc=&5509
-  180disp_exits=&550C
-  190list_objects=&550F
-  200get_cmd=&5512
-  210action_cmd=&5515
-  220inventory=&5518
-  230get_state_bit=&551B
-  240clear_state_bit=&551E
-  250set_state_bit=&5521
-  260select_msg=&5524
-  270select_sysmsg=&5527
-  280test_avail=&552A
-  290test_avail_X=&552D
+  110cmdbuf=&900
+  120loc=&5B80
+  130exits=&5F42
+  140prev_rm=&5F50
+  150get_state_bit=&5FD0
+  160clear_state_bit=&5FD3
+  170set_state_bit=&5FD6
+  180select_msg=&5FD9
+  190select_sysmsg=&5FDC
+  200test_avail=&5FDF
+  210test_avail_X=&5FE2
+  220init_game=&5FE5
+  230select_room=&5FE8
+  240art_light=&5FEB
+  250disp_desc=&5FEE
+  260disp_exits=&5FF1
+  270list_objects=&5FF4
+  280get_cmd=&5FF7
+  290action_cmd=&5FFA
+  300inventory=&5FFD
  1000CLS
  1010CALLinit_game
  1020REPEAT
@@ -48,15 +49,15 @@
  1180IFV%=13ANDN%=6ANDR%=1ANDFNb(7)<>0ANDFNb(5)PROCm(19):E%=0:V%=0
  1190IFV%=13ANDN%=15ANDR%<>2THENE%=7
  1200IFV%=13ANDN%=15ANDR%=2THENE%=9
- 1210IFV%=17ANDN%=5THENV%=19
- 1220IFV%=17PROCopen
- 1230IFV%=18PROCclose
- 1240IFV%=19PROCsearch
- 1250IFV%=20PROCshake
- 1260IFV%=21PROCbend
- 1270IFV%=22PROCbake
- 1280IFV%=23PROCins
- 1290IFV%=24PROChelp
+ 1210IFV%=25ANDN%=5THENV%=27
+ 1220IFV%=25PROCopen
+ 1230IFV%=26PROCclose
+ 1240IFV%=27PROCsearch
+ 1250IFV%=28PROCshake
+ 1260IFV%=29PROCbend
+ 1270IFV%=30PROCbake
+ 1280IFV%=31PROCins
+ 1290IFV%=32PROChelp
  1300IFV%=15ANDN%=3ANDR%=8ANDloc?3=0ANDL%<>0PROCsb(11):loc?3=254:PROCm(4):V%=0
  2000CALLaction_cmd
  2010IF?cmdbuf=81THENE%=10
