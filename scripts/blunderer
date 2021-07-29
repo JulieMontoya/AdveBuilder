@@ -1,0 +1,388 @@
+#!/opt/local/bin/perl -w
+#!/usr/bin/perl -w
+use strict;
+use constant { TRUE => "1", FALSE => "" };
+use DBI;
+use Data::Dumper;
+use Getopt::Std;
+
+my %OPTIONS;
+getopts "dDq:", \%OPTIONS;
+
+my $DB_NAME = "sixrooms";
+my $DB_HOST = "localhost";
+my $DB_USER = "julie";
+my $DB_PASS = "clamdigger";
+
+my $done = FALSE;
+my ($cmd, $verb, $dest, $back, $noun, $verb_no, $back_no, $noun_no);
+my (@verbs, %verbs, $auto_safe, $banner);
+
+my $SAFE = !$OPTIONS{"D"};
+my $DEBUG = $OPTIONS{"d"};
+
+my ($description, @exits, $exits, $direction, @directions, $show_desc);
+
+my ($dbh, $query, $sth, @record, $count, $i, $success);
+
+if ($_ = $OPTIONS{"q"}) {
+    $DB_NAME = $_;
+    $dbh = DBI->connect("DBI:SQLite:database=${DB_NAME}.sqlite3",
+                        "","");
+}
+else {
+    $dbh = DBI->connect("DBI:mysql:database=$DB_NAME;host=$DB_HOST",
+                        "$DB_USER","$DB_PASS");
+};
+
+my $match_verb = "SELECT vn FROM verbs WHERE verb LIKE ?";
+my $sth_match_verb = $dbh->prepare($match_verb);
+
+my $get_room = "SELECT description FROM rooms WHERE id=?";
+my $sth_get_room = $dbh->prepare($get_room);
+my $get_exits = "SELECT direction,dest FROM exits WHERE room=?";
+my $sth_get_exits = $dbh->prepare($get_exits);
+my $check_room = "SELECT COUNT(*) FROM rooms WHERE id=?";
+my $sth_check_room = $dbh->prepare($check_room);
+
+my $create_room = "INSERT INTO rooms (id,description) VALUES (?,?)";
+my $new_room = "INSERT INTO rooms(description) VALUES(\"\")";
+my $update_desc = "UPDATE rooms SET description=? WHERE id=?";
+my $join_exit = "REPLACE INTO exits (room, direction, dest) VALUES (?,?,?)";
+my $disconnect_exit = "DELETE FROM exits WHERE room=? AND direction=?";
+
+############################  GET DIRECTION  VERBS  ############################
+
+$query = "SELECT verb,vn FROM verbs WHERE (LENGTH(verb)>2 OR vn>8) AND vn<11 "
+       . "ORDER BY vn";
+$sth = $dbh->prepare($query);
+
+$sth->execute;
+while (($verb, $verb_no) = $sth->fetchrow_array) {
+    $directions[$verb_no] = $verb;
+};
+$sth->finish;
+
+#########################  BEGIN FUNCTION DEFINITIONS  #########################
+
+sub opposite_dir {
+    my $direction = shift;
+    my $back_dir;
+    
+    if ($direction > 8) {
+        $back_dir = 19 - $direction;
+    }
+    else {
+        $back_dir = 4 + $direction;
+        $back_dir -= 8 if $back_dir > 8;
+    };
+    
+    $back_dir;
+};
+
+##########################  END FUNCTION DEFINITIONS  ##########################
+
+my $current_room = 1;
+my $show_desc = TRUE;
+
+while (!$done) {
+    if ($show_desc) {
+        $banner = sprintf "=====  ROOM #%d  ==========", $current_room;
+        $banner = substr $banner, 0, 23;
+        $banner .= "=" x 20;
+        #$banner .= $SAFE ? "=====  SAFE MODE  =====" : "  DANGEROUS MODE  =====";
+        if ($SAFE) {
+            $banner .= "==============  SAFE MODE  =====";
+        }
+        elsif (defined $auto_safe) {
+            $_ = sprintf "=========  DANGEROUS MODE  [%d]  =====", $auto_safe;
+            $_ = substr $_, -32;
+            $banner .= $_;
+        }
+        else {
+            # $banner .= "=========  DANGEROUS MODE  =====";
+            $banner .= "=========  DANGEROUS MODE  =====";
+        };
+        
+        print "$banner\n";
+        # printf "%8d\n", length $banner;
+        
+        $sth_get_room->execute($current_room);
+        ($description) = $sth_get_room->fetchrow_array;
+        $sth_get_room->finish;
+        if (!defined $description) {
+            print "No database entry for room #$current_room!\n";
+            #$dbh->do($create_room, undef, $current_room, $description);
+            $dbh->do($create_room, undef, $current_room, "");
+        };
+        if ($description =~ /\S/) {
+            print "$description\n\n";
+        }
+        else {
+            printf "You are in room #%d\n\n", $current_room;
+        };
+
+        @exits = ();
+        $exits = 0;
+        $sth_get_exits->execute($current_room);
+        while (($direction, $dest) = $sth_get_exits->fetchrow_array) {
+            print "Exits: "     unless $exits++;
+            $exits[$direction] = $dest;
+            printf "%s [%d] ",$directions[$direction], $dest;
+        };
+        print "\n"              if $exits;
+
+        $show_desc = FALSE;
+    };
+    
+    print ": ";
+    $cmd = <>;
+    $done = TRUE unless $cmd;
+    last if $done;
+    
+    $cmd = uc $cmd;
+    $cmd =~ tr/\r\n//d;
+
+    undef $verb;
+    undef $back;
+    undef $dest;
+    undef $noun;
+
+    if ($cmd =~ /(\S+)\/(\S+)\s+(\S+)/) {
+        print "Structure: VERB/BACK NOUN\n"			if $DEBUG;
+        $verb = $1;
+        $back = $2;
+        $noun = $3;
+    }
+    elsif ($cmd =~ /(\S+)\/\s+(\S+)/) {
+        print "Structure: VERB/no back NOUN\n"		if $DEBUG;
+        $verb = $1;
+        $back = "";
+        $noun = $2;
+    }
+    elsif ($cmd =~ /(\S+)\/(\S+)/) {
+        print "Structure: VERB/BACK\n"				if $DEBUG;
+        $verb = $1;
+        $back = $2;
+        $noun = "";
+    }
+    elsif ($cmd =~ /(\S+)\//) {
+        print "Structure: VERB/no_back\n"			if $DEBUG;
+        $verb = $1;
+        $back = "";
+        $noun = "";
+    }
+    elsif ($cmd =~ /(\S+)\s+(\S+)/) {
+        print "Structure: VERB NOUN\n"				if $DEBUG;
+        $verb = $1;
+        $noun = $2;
+        undef $back;
+    }
+    elsif ($cmd =~ /(\S+)/) {
+        print "Structure: VERB\n"					if $DEBUG;
+        $verb = $1;
+        $noun = "";
+        undef $back;
+    }
+    else {
+        print "Structure: nothing\n"				if $DEBUG;
+        $verb = $noun = "";
+        undef $back;
+        $show_desc = TRUE;
+    };
+
+    if ($verb =~ /(\S*)\s*:\s*(\S*)/) {
+        print "Verb has a colon in it\n";
+        $verb = $1;
+        $dest = $2;
+    };
+
+    if ($DEBUG) {
+		if (defined $back) {
+			printf "|%s| / |%s| |%s|\n", $verb, $back, $noun;
+		}
+		else {
+			printf "|%s|%s|\n", $verb, $noun;
+		};
+	};
+
+    undef $verb_no;
+    
+    if ($verb) {
+        $sth_match_verb->execute("$verb%");
+        ($verb_no) = $sth_match_verb->fetchrow_array;
+        $sth_match_verb->finish;
+
+        if ($back) {
+            $sth_match_verb->execute("$back%");
+            ($back_no) = $sth_match_verb->fetchrow_array;
+            $sth_match_verb->finish;
+        }
+        else {
+            undef $back_no;
+        };
+
+		if ($DEBUG) {
+			if ($verb_no && $back_no) {
+				printf "|%s|%d| / |%s|%d| |%s|\n", $verb, $verb_no,
+					$back, $back_no, $noun;
+			}
+			elsif ($verb_no) {
+				printf "|%s|%d|%s|\n", $verb, $verb_no, $noun;
+			};
+		};
+    };
+
+    if (defined $verb_no) {
+        ########################  1-10  =>  DIRECTIONS  ########################
+        if ($verb_no >= 1 && $verb_no <= 10) {
+            printf "Direction command '%s'\n", $directions[$verb_no];
+            if (defined $noun && $noun =~ /^\d+$/) {
+                $dest = $noun + 0;
+                
+                if (!defined $back_no) {
+                    $back_no = opposite_dir $verb_no;
+                };
+                print defined $back ? "Back is '$back'\n" : "Back is undefined\n";
+                if (defined $back && !$back) {
+                    printf "Leaving %s / one way\n", $directions[$verb_no];
+                }
+                else {
+                    printf "Leaving %s / returning %s\n", $directions[$verb_no], $directions[$back_no];
+                };
+                
+                if ($SAFE) {
+                    printf "Cannot create link to room #%d in safe mode!\n", $dest;
+                }
+                else {
+                    $dbh->do($join_exit, undef, $current_room, $verb_no, $dest);
+                    if (defined $back && !$back) {
+                        $dbh->do($disconnect_exit, undef, $dest, $back_no);
+                    }
+                    else {
+                        $dbh->do($join_exit, undef, $dest, $back_no, $current_room);
+                    };
+
+                    $current_room = $dest;
+                    undef $description;
+                    $show_desc = TRUE;
+                };
+            }
+            elsif (defined $exits[$verb_no]) {
+                $dest = $exits[$verb_no];
+                printf "Leads to room #%d\n", $dest;
+
+                $current_room = $dest;
+                undef $description;
+                $show_desc = TRUE;
+            }
+            else {
+                printf "No exit %s!\n", $directions[$verb_no];
+                unless (defined $back_no) {
+                    $back_no = opposite_dir $verb_no;
+                };
+                if ($SAFE) {
+                    print "You can't bash through walls in safe mode .....\n";
+                }
+                else {
+                    if (defined $noun && $noun =~ /^\d+$/) {
+                        $dest = $noun + 0;
+                        printf "Linking %s from room #%d to room #%d\n",
+                            $directions[$verb_no], $current_room, $dest;
+                        $dbh->do($join_exit, undef, $current_room, $verb_no, $dest);
+                    }
+                    else {
+                        print "Need to create a new room .....  ";
+                        $dbh->do($new_room);
+                        $dest = $dbh->last_insert_id(undef, undef, "rooms", "id");
+                        printf "New room will be #%d\n", $dest;
+                        #$dbh->do($update_desc, undef, sprintf("You are in room #%d", $dest), $dest);
+                        printf "Linking %s from room #%d to room #%d\n",
+                            $directions[$verb_no], $current_room, $dest;
+                        $dbh->do($join_exit, undef, $current_room, $verb_no, $dest);
+                    };
+                    
+                    if (defined $back) {
+                        if ($back) {
+                            printf "Coming back %d [%s]\n", $back_no, $back;
+                            $dbh->do($join_exit, undef, $dest, $back_no, $current_room);
+                        }
+                        else {
+                            print "Not linking back.\n";
+                        };
+                    }
+                    else {
+                        printf "Way back is %d [%s]\n", $back_no, $directions[$back_no];
+                        $dbh->do($join_exit, undef, $dest, $back_no, $current_room);
+                    };
+                    
+                    $current_room = $dest;
+                    undef $description;
+                    $show_desc = TRUE;
+                };
+            };
+        }
+        ############################  201 =>  SAFE  ############################
+        elsif ($verb_no == 201) {
+            print "Safe mode is on!\n";
+            $SAFE = TRUE;
+        }
+        ##########################  202 => DANGEROUS  ##########################
+        elsif ($verb_no == 202) {
+            if ($noun) {
+                $auto_safe = $noun + 0;
+                printf "Dangerous mode is on, for %d move%s only .....\n",
+                    $auto_safe, ($auto_safe > 1 ? "s" : "");
+                ++$auto_safe;
+            }
+            else {
+                print "Dangerous mode is on!\n";
+            };
+            $SAFE = FALSE;
+        }
+        ##########################  203 =>  DESCRIBE  ##########################
+        elsif ($verb_no == 203) {
+            if ($description =~ /\S/ && $SAFE) {
+                print "You can't edit descriptions in safe mode.\n";
+            }
+            else {
+                printf "Enter new description for room #%d\n:", $current_room;
+                $description = <>;
+                $description =~ tr/\r\n//d;
+                $dbh->do($update_desc, undef, $description, $current_room);
+                
+                undef $description;
+                $show_desc = TRUE;
+            };
+        }
+        ############################  201 =>  GOTO  ############################
+        elsif ($verb_no == 204) {
+            $dest = $noun + 0;
+            $sth_check_room->execute($dest);
+            ($count) = $sth_check_room->fetchrow_array;
+            $sth_check_room->finish;
+            
+            if (!$count && $SAFE) {
+                printf "There is no such room as #%d\n", $dest;
+            }
+            else {
+                $current_room = $dest;
+                undef $description;
+                $show_desc = TRUE;
+            };
+        };
+    
+    };
+    
+    if ($auto_safe) {
+        --$auto_safe;
+        if ($auto_safe < 1) {
+            $SAFE = TRUE;
+            undef $auto_safe;
+        };
+    };
+    
+    $done = TRUE if $cmd =~ /!/i;
+};
+
+exit;
