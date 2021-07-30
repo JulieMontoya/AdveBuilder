@@ -123,6 +123,12 @@ This is an older version of the game engine, with a different implementation of 
 
 # What Changed
 
+### 3 to 4
+
+Entry points and workspace addresses have been changed  (now moved to top end of code, just before frame buffer).  New built-in commands `SAVE`, `RESTORE`, `RESTART`.
+
+### 2 to 3
+
 The "old" way of storing EXAMINE messages was as follows:
 
 0 => no message
