@@ -13,3 +13,12 @@ that would spoil the fun.  So here is a link straight to the disc image
 [birthday_adv.ssd](https://github.com/JulieMontoya/AdveBuilder/blob/main/birthday_adv/birthday_adv.ssd)
 so you can play it now and solve it on your own without seeing anything you
 don't want to.
+
+# src
+
+BeebAsm source code for the AdveBuilder game engine.
+
+# scripts
+
+Perl and shell scripts for working with the SQLite3 database on the host.
+
