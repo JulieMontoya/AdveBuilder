@@ -1,6 +1,6 @@
 # BeebAsm Source Files
 
-# abengine4.6502
+# abengine5.6502
 
 The AdveBuilder game engine provides the following features:
 + Integrates text compression, word wrapping and automatic capitalisation
@@ -10,6 +10,10 @@ The AdveBuilder game engine provides the following features:
 + Handles picking up and dropping objects and listing the player's inventory
 + Displays messages when the player `EXAMINE`s objects
 + Saves and restores the game state and restarts a game from the beginning.
+
+This version provides an extra level of independence from the game database.
+
+**The Huffman tree is part of the database too, you dizzy tart**
 
 ## Entry Points
 
@@ -112,6 +116,9 @@ This does likewise, but for the object whose ID is given in the X register  (`X%
     RTS
 ```
 
+# abengine4.6502
+
+This is an older version of the game engine which required the addresses of the database tables to be compiled into it.  In this version, the addresses are obtained from well-known locations in the game data file.
 
 # abengine3.6502
 
