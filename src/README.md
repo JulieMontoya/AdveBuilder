@@ -130,6 +130,10 @@ This is an older version of the game engine, with a different implementation of 
 
 # What Changed
 
+### 4 to 5
+
+Base addresses of tables are no longer hard-coded into the engine Source Code, but obtained indirectly with a single presumption: the Huffman tree must start at the beginning of the last page of the data file, and the addresses of the other tables must be included at the end of that page.  (Which limits the maximum size of the tree, but this probably will not matter in practice; there is more likely to be a shortfall between the end of the tree and the beginning of the tables, and there probably will be something that can be moved to fit into this space if needed.)  This should mean it would be possible to swap out different database files with the same game engine code.
+
 ### 3 to 4
 
 Entry points and workspace addresses have been changed  (now moved to top end of code, just before frame buffer).  New built-in commands `SAVE`, `RESTORE`, `RESTART`.
