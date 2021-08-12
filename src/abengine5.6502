@@ -440,9 +440,30 @@ ORG &5500
 \
 \  ACTION COMMAND
 \
-\  CHECK THE STATUS IN E%; ANYTHING BUT 0 INDICATES AN ERROR
+\  CHECK FOR DIE and LIVE FIRST; THEY DON'T CARE ABOUT E%.
 
 .real_action_cmd
+    LDX bas_var_V
+    BEQ _ac_null
+
+    CPX #20             \  DIE pseudo-verb
+    BNE _ac_not_die
+._ac_die
+    JSR _ac_live
+    LDA #10
+    JMP real_select_sysmsg
+    
+._ac_not_die
+    CPX #21             \  LIVE pseudo-verb
+    BNE _ac_not_live
+._ac_live
+    LDA bas_var_M
+    JMP real_select_msg
+
+._ac_not_live
+
+\  CHECK THE STATUS IN E%; ANYTHING BUT 0 INDICATES AN ERROR
+
     LDA bas_var_E       \  If non-zero, display error message
     BEQ _ac_no_err
     JMP real_select_sysmsg
@@ -450,8 +471,6 @@ ORG &5500
 \  IF E% = 0 THEN ASSUME THE COMMAND IS SAFE TO ACTION
 
 ._ac_no_err
-    LDX bas_var_V
-    BEQ _ac_null
     CPX #12             \  back is a direction too
     BCS _ac_not_dir
 ._ac_dir
@@ -618,21 +637,21 @@ ORG &5500
     JMP real_init_game
 
 ._ac_not_restart
-    CPX #20             \  DIE pseudo-verb
-    BNE _ac_not_die
-._ac_die
-    JSR _ac_live
-    LDA #10
-    JMP real_select_sysmsg
-    
-._ac_not_die
-    CPX #21             \  LIVE pseudo-verb
-    BNE _ac_not_live
-._ac_live
-    LDA bas_var_M
-    JMP real_select_msg
-
-._ac_not_live
+\    CPX #20             \  DIE pseudo-verb
+\    BNE _ac_not_die
+\._ac_die
+\    JSR _ac_live
+\    LDA #10
+\    JMP real_select_sysmsg
+\    
+\._ac_not_die
+\    CPX #21             \  LIVE pseudo-verb
+\    BNE _ac_not_live
+\._ac_live
+\    LDA bas_var_M
+\    JMP real_select_msg
+\
+\._ac_not_live
     RTS
     
 .setup_osfile
