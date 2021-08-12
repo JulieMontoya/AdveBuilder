@@ -11,9 +11,7 @@ The AdveBuilder game engine provides the following features:
 + Displays messages when the player `EXAMINE`s objects
 + Saves and restores the game state and restarts a game from the beginning.
 
-This version provides an extra level of independence from the game database.
-
-**The Huffman tree is part of the database too, you dizzy tart**
+This version provides an extra level of independence from the game database.  The Huffman tree is held in the last page of the data file, immediately before the beginning of the engine code.  At the end of the last page are the addresses of database tables: verb list, noun / modifier list, game messages, stock messages, rooms and objects.  Therefore, these no longer need to be hard-coded into the engine; the only hard-coded address is the start of this page.
 
 ## Entry Points
 
@@ -21,7 +19,7 @@ The game engine is intended to be called from a BASIC program.  It provides the 
 
 ### init_game
 
-This subroutine sets all game state bits and characters to zero, all objects to their initial locations, sets `R%=1` so the player starts off in room 1, displays stock message #0 corresponding to **welcome** and sets the `show_desc` flag to force the room description to be displayed.
+This subroutine sets all game state bits and characters to zero, all objects to their initial locations, sets `R%=1` so the player starts off in room 1, displays stock message #0 corresponding to **WELCOME** and sets the `show_desc` flag to force the room description to be displayed.
 
 ### select_room
 
@@ -73,6 +71,8 @@ This subroutine first looks at `E%` and determines whether or not an error messa
 + If the command is `SAVE`, we store the current room (from `R%`) and previous rooms (so when the game is restored, `BACK` returns to the room visited before the one in which the `SAVE` command was given, and not the room visited before the one in which the `RESTORE` command was given) in the game state area, set up a control block and fire off a call to OSFILE &00 to save out the game state area.  If the command is more than one word long, the last word  (whose starting address will be in `I%`)  is treated as a filename; otherwise, a default filename is assumed.
 + If the command is `RESTORE`, we set up a control block, again using the last word of the command as a filename if present, and fire off a call to OSFILE &FF; then retrieve the previous and current rooms and set the "show description" flag.
 + If the command is `RESTART`, we call `init_game` to start a new game.
++ If the command is the special pseudo-command `DIE`, we display the message given by `M%` and kill off the player.
++ If the command is the special pseudo-command `LIVE`, we display the message given by `M%`.  (This and the immediately preceding are intended to be set by game logic.)
 
 ### get_state_bit
 
