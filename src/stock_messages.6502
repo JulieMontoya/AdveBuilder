@@ -1,0 +1,13 @@
+\  STOCK MESSAGE IDs
+
+SM_WELCOME      = 0
+SM_NONSENSE     = 1
+SM_CANT_DO      = 2
+SM_NO_EXIT      = 3
+SM_DARK         = 4
+SM_PRE_INV      = 5
+SM_INV_NONE     = 6
+SM_NOT_HERE     = 7
+SM_NO_CARRY     = 8
+SM_EXAM_0SPEC   = 9
+SM_GAME_OVER    = 10

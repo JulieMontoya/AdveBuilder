@@ -36,19 +36,19 @@ wordbuf    = &9C0       \  word buffer
 LWIDTH     = 40         \  line width
 LIGHT_SRC  = 9          \  light source
 
-bas_var_D = &410        \  basic variable D% = destination
-bas_var_E = &414        \  basic variable E% = error
-bas_var_I = &424        \  basic variable I% = index of word
+bas_var_D = &410        \  BASIC variable D% = destination
+bas_var_E = &414        \  BASIC variable E% = error
+bas_var_I = &424        \  BASIC variable I% = index of word
 bas_var_K = &42C        \  BASIC variable K% = light status of dest room
 bas_var_L = &430        \  BASIC variable L% = light status
-bas_var_M = &434    	\  basic variable M% = modifier
-bas_var_N = &438    	\  basic variable N% = noun
-bas_var_R = &448        \  basic variable R% = room
-bas_var_V = &458    	\  basic variable V% = verb
+bas_var_M = &434    	\  BASIC variable M% = modifier
+bas_var_N = &438    	\  BASIC variable N% = noun
+bas_var_R = &448        \  BASIC variable R% = room
+bas_var_V = &458    	\  BASIC variable V% = verb
 
 cmdbuf = &900
 
-game_data = &4900
+game_data = &4800
 
 osfile = &FFDD          \  = *SAVE / *LOAD
 osasci = &FFE3      	\  display character
@@ -65,7 +65,6 @@ ORG &5500
 
 ._code_begin
 
-    
 .match_verb
     JMP real_match_verb
 .match_noun
@@ -97,14 +96,14 @@ ORG &5500
     JMP real_unpack_room
 .maybe_auto_cap
     JMP real_maybe_auto_cap
-    
-    
+
 \  PARSE A COMMAND
 \
 \  On exit, BASIC variables will be set as follows:
 \    V% => the first word (verb)
 \    M% => the second word (modifier)
-\    N% => the last word (noun)
+\    N% => the last word (noun) (may be same as M%)
+\    I% => index in memory of last word
 
 .real_parse_cmd
     JSR real_reset_cmd_buffer
@@ -165,11 +164,11 @@ ORG &5500
 
 .real_match_noun
     LDY #&F6            \  noun_list
-    JSR init_word_ptr
+    JSR init_list_ptr
     BNE _mw0
 .real_match_verb
     LDY #&F4            \  verb_list
-    JSR init_word_ptr
+    JSR init_list_ptr
 ._mw0
     LDY #0    
 ._mw1
@@ -177,19 +176,19 @@ ORG &5500
     STA bas_var_I
     LDA cmd_ptr+1
     STA bas_var_I+1
-    LDA (word_ptr), Y
+    LDA (list_ptr), Y
     BEQ _mw_end
     BMI _mw3
 ._mw2
-    JSR adv_word_ptr
+    JSR adv_list_ptr
     BNE _mw1            \  either BNE succeeded, or INC gave
                         \  high byte of an address in RAM
-\  HERE WE HAVE A WORD NUMBER AT (word_ptr), Y
+\  HERE WE HAVE A WORD NUMBER AT (list_ptr), Y
 ._mw3
     TAX                 \  save the maybe-matched word number
-    JSR adv_word_ptr
+    JSR adv_list_ptr
     LDA (cmd_ptr), Y    \  first char of word in buffer
-    CMP (word_ptr), Y   \  see if it matched
+    CMP (list_ptr), Y   \  see if it matched
     BNE _mw_miss
 \  HERE WE HAVE MATCHED THE FIRST BYTE OF A WORD
 ._mw4
@@ -197,7 +196,7 @@ ORG &5500
     LDA (cmd_ptr), Y
     CMP #33             \  C=0 => end of cmd word
     BCC _mw5
-    CMP (word_ptr), Y
+    CMP (list_ptr), Y
     BEQ _mw4            \  keep going as long as it matches
 \  HERE WE FAILED TO MATCH A CHARACTER
 ._mw_miss
@@ -215,10 +214,10 @@ ORG &5500
 
 \  ADVANCE THE WORD LIST POINTER
 
-.adv_word_ptr
-    INC word_ptr        \  increase the low byte
+.adv_list_ptr
+    INC list_ptr        \  increase the low byte
     BNE _awp1           \  done, if it did not roll over
-    INC word_ptr+1      \  increase the high byte
+    INC list_ptr+1      \  increase the high byte
 ._awp1
     RTS                 \  NB. here Z=0 for sure
 
@@ -617,7 +616,23 @@ ORG &5500
     BNE _ac_not_restart
 ._ac_restart
     JMP real_init_game
+
 ._ac_not_restart
+    CPX #20             \  DIE pseudo-verb
+    BNE _ac_not_die
+._ac_die
+    JSR _ac_live
+    LDA #10
+    JMP real_select_sysmsg
+    
+._ac_not_die
+    CPX #21             \  LIVE pseudo-verb
+    BNE _ac_not_live
+._ac_live
+    LDA bas_var_M
+    JMP real_select_msg
+
+._ac_not_live
     RTS
     
 .setup_osfile
@@ -700,7 +715,7 @@ ORG &5500
     AND bits_LR, X
     RTS
 
-\  SET A GAME STATE BIT
+\  CLEAR A GAME STATE BIT, BY SETTING IT AND THEN FLIPPING IT
 
 .real_clear_state_bit
     JSR real_set_state_bit
@@ -708,7 +723,7 @@ ORG &5500
     STA state_bits, Y
     RTS
 
-\  CLEAR A GAME STATE BIT
+\  SET A GAME STATE BIT
 
 .real_set_state_bit
     JSR real_get_bit_offset
@@ -717,7 +732,32 @@ ORG &5500
     STA state_bits, Y
     RTS
 
-\  ON RETURN:
+\  GET THE VISITED STATE OF A ROOM
+
+.real_get_visited
+    LDA bas_var_R
+.real_get_visited0
+    JSR real_get_bit_offset
+    LDA visited_bits, Y
+    AND bits_LR, X
+    RTS
+
+.clear_visited
+    JSR set_visited
+    ORA bits_LR, X
+    STA visited_bits, Y
+    RTS
+
+.set_visited
+    JSR real_get_bit_offset
+    LDA visited_bits, Y
+    ORA bits_LR, X
+    STA visited_bits, Y
+    RTS
+    
+\  ON ENTRY;
+\  A => INDEX TO BIT
+\  ON RETURN;
 \  Y => INDEX TO BYTE
 \  X => INDEX TO BIT WITHIN BYTE
 
@@ -984,13 +1024,15 @@ ALIGN &40
 \  ON RETURN, THE POINTER AT [X, X+1] CONTAINS THE ADDRESS POINTED TO
 \  BY THE A'TH ENTRY IN THE TABLE AT OFFSET Y.
 \
-\  OFFSETS WITHIN TABLE OF TABLES IS AT tables POINT TO;
-\     0  => verbs
-\     2  => nouns and modifiers
-\     4  => game messages
-\     6  => stock messages
-\     8  => rooms
-\    10  => objects
+\  OFFSETS ARE GIVEN RELATIVE TO tables0, WHICH IS THE FIRST BYTE (&xx00)
+\  IN THE LAST PAGE OF THE GAME DATA.
+\
+\    &F4 => verbs
+\    &F6 => nouns and modifiers
+\    &F8 => game messages
+\    &FA => stock messages
+\    &FC => rooms
+\    &FE => objects
 
 .init_ptr
     STA tempY
@@ -1007,16 +1049,11 @@ ALIGN &40
     STA 1,X
     RTS                 \  with Z=0
 
-\  INITIALISE word_ptr TO BEGINING OF A WORD LIST
+\  INITIALISE LIST POINTER TO POINT TO THE BEGINNING OF A TABLE
+\  THIS IS USED BOTH FOR STRAIGHTFORWARD LINEAR SEARCHES, AS IN THE WORD
+\  LISTS, AND DOUBLE-INDIRECTION TO AN ENTRY WITHIN A LIST SELECTED FROM
+\  A LIST OF LISTS.
 
-.init_word_ptr
-    LDX #word_ptr
-    LDA tables0,Y
-    STA 0,X
-    LDA tables0+1,Y
-    STA 1,X
-    RTS
-    
 .init_list_ptr
     LDA tables0,Y
     STA list_ptr
@@ -1706,8 +1743,10 @@ ALIGN &40
 
 ALIGN &100
 CLEAR _real_end_of_code, P%
-ORG P%-48               \  16 * JMP xxxx => 48 bytes
+ORG P%-51               \  17 * JMP xxxx => 51 bytes
 
+.get_visited
+    JMP real_get_visited
 .get_state_bit
     JMP real_get_state_bit
 .clear_state_bit
@@ -1747,130 +1786,24 @@ ORG P%-48               \  16 * JMP xxxx => 48 bytes
 
 ORG game_data
 
-\  Mistake on my part:
-\
-\  Verbs need to have higher numbers than nouns, so nouns can map
-\  directly to objects wherever possible.
-
-\  THE VOCABULARY SECTIONS PROBABLY WILL NEED MOVING INTO THE
-\  GAME DATA IN DUE COURSE.
-
-.verb_list
-\  BUILT-IN VERBS; DIRECTIONS
-    EQUB &81: EQUS "NORTH"
-    EQUB &83: EQUS "EAST"
-    EQUB &85: EQUS "SOUTH"
-    EQUB &87: EQUS "WEST"
-    EQUB &82: EQUS "NE"
-    EQUB &82: EQUS "NORTHEAST"
-    EQUB &84: EQUS "SE"
-    EQUB &84: EQUS "SOUTHEAST"
-    EQUB &86: EQUS "SW"
-    EQUB &86: EQUS "SOUTHWEST"
-    EQUB &88: EQUS "NW"
-    EQUB &88: EQUS "NORTHWEST"
-    EQUB &89: EQUS "UP"
-    EQUB &89: EQUS "CLIMB"
-    EQUB &8A: EQUS "DOWN"
-    EQUB &8A: EQUS "DESCEND"
-    EQUB &8B: EQUS "BACK"
-\  BUILT-IN VERBS; OTHER
-    EQUB &8C: EQUS "LOOK"
-    EQUB &8D: EQUS "EXAMINE"
-    EQUB &8D: EQUS "READ"
-    EQUB &8E: EQUS "TAKE"
-    EQUB &8E: EQUS "GET"
-    EQUB &8E: EQUS "PICKUP"
-    EQUB &8F: EQUS "DROP"
-    EQUB &8F: EQUS "PUTDOWN"
-    EQUB &8F: EQUS "LEAVE"
-    EQUB &90: EQUS "INVENTORY"
-    EQUB &90: EQUS "CARRYING"
-    EQUB &90: EQUS "LIST"
-    EQUB &91: EQUS "SAVE"
-    EQUB &92: EQUS "RESTORE"
-    EQUB &93: EQUS "RESTART"
-
-\  BUILT-IN VERBS; NOISE WORDS
-    EQUB &80: EQUS "GO"
-    EQUB &80: EQUS "WALK"
-    EQUB &80: EQUS "SAY"
-    
-\  EXTENDED VERBS
-    EQUB &99: EQUS "OPEN"
-    EQUB &99: EQUS "UNFOLD"
-    EQUB &99: EQUS "DEPLOY"
-    EQUB &9A: EQUS "FOLD"
-    EQUB &9A: EQUS "CLOSE"
-    EQUB &9B: EQUS "SEARCH"
-    EQUB &9C: EQUS "SHAKE"
-    EQUB &9D: EQUS "BEND"
-    EQUB &9D: EQUS "SNAP"
-    EQUB &9E: EQUS "BAKE"
-    EQUB &9F: EQUS "INSERT"
-    EQUB &9F: EQUS "USE"
-    EQUB &A0: EQUS "CLUE"
-    EQUB &A0: EQUS "HELP"
-
-    BRK
-._verb_list_end
-
-\  NOUN LIST IN REAL LIFE WILL BE PART OF GAME DATA
-
-.noun_list
-    EQUB &81: EQUS "UMBRELLA"
-    EQUB &81: EQUS "BROLLY"
-    EQUB &83: EQUS "BIRDSEED"
-    EQUB &83: EQUS "SEED"
-    EQUB &83: EQUS "BAG"
-    EQUB &84: EQUS "MIX"
-    EQUB &84: EQUS "CAKE"
-    EQUB &85: EQUS "CUPBOARD"
-    EQUB &86: EQUS "METER"
-    EQUB &87: EQUS "EGG"
-    EQUS &88: EQUS "SOFA"
-    EQUB &89: EQUS "TUBE"
-    EQUB &89: EQUS "GLOWSTICK"
-    EQUB &8B: EQUS "HEN"
-    EQUB &8B: EQUS "CHICKEN"    
-    EQUB &8D: EQUS "TINS"
-    EQUB &8D: EQUS "PANS"
-    EQUB &8E: EQUS "COIN"
-    EQUB &8F: EQUS "OVEN"
-
-    BRK
-._noun_list_end
-
-INCLUDE "birthday_data_eng3.6502"
-
-\\  CODA WITH STARTING ADDRESS OF LISTS AT WELL-KNOWN LOCATION
-
-ALIGN &100
-CLEAR _game_data_end, P%
-ORG P%-12               \  6 * 2 bytes
-
-.tables
-    EQUW verb_list
-    EQUW noun_list
-    EQUW msg_table
-    EQUW smsg_table
-    EQUW room_table
-    EQUW obj_table
-
-._game_data_real_end
+INCLUDE "birthday_data_eng5.6502"
  
- tables0 = tables AND &FF00
+tables0 = tree AND &FF00
 
 SAVE "M.ABENGIN", _code_begin, _code_end, _rts
-SAVE "D.BIRTHDY", game_data, _game_data_real_end
+SAVE "D.BIRTHDY", game_data, _game_data_end
 
 PRINT "Code length =", ~_code_end-_code_begin
 PRINT "Data length =",~_game_data_end - game_data
 PRINT ""
 PRINT "loc =",~object_loc
 PRINT ""
+PRINT "tree =", ~tree
+PRINT "tables =", ~tables
+PRINT ""
 PRINT "newwrch =", ~newwrch
 PRINT "newnewl =", ~newnewl
+\PRINT ""
 
 \\  DEDICATED TO THE PUBLIC DOMAIN 2021 BY JULIE KIRSTY LOUISE MONTOYA
 \\  <bluerizlagirl@gmail.com>  NO RIGHTS RESERVED
