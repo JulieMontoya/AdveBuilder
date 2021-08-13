@@ -21,13 +21,14 @@ database.
 
 -w -- specifies actually to write the tree information to the database.
 
-# pack_database3
+# pack_database4
 
-This script takes the database now with included Huffman tree, packs the text using
-the encoding tree and generates the data expected by the uncompression subroutine
-in the game engine.  It works with versions of the database where `exam_msg` is a
-TEXT field, and versions of the game engine where the `select_obj` entry point and
-`EXAMINE` command expect the database in this format.
+This script takes the database now with included word lists, Huffman tree and table
+of tables; packs the text using the encoding tree and generates the data expected
+by the uncompression subroutine in the game engine.  It works with versions of the
+database where `exam_msg` is a TEXT field, and versions of the game engine where
+the `select_obj` entry point and `EXAMINE` command expect the database in this
+format.
 
 Command Line Options:
 
@@ -35,6 +36,9 @@ Command Line Options:
 database.
 
 -o output_file_name -- specifies the output file to be written.
+
+_-L 2|4_ -- _specifies whether to use 2 or 4 light levels; this feature is intended_
+_for use with a future version of the game engine.  Do not use it yet._
 
 # Older Versions
 
@@ -53,6 +57,14 @@ Command Line Options:
 database.
 
 -w -- specifies actually to write the tree information to the database.
+
+# pack_database3
+
+This script takes the database now with included Huffman tree, packs the text using
+the encoding tree and generates the data expected by the uncompression subroutine
+in the game engine.  It works with versions of the database where `exam_msg` is a
+TEXT field, and versions of the game engine where the `select_obj` entry point and
+`EXAMINE` command expect the database in this format.
 
 # pack_database
 
