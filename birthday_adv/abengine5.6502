@@ -472,6 +472,8 @@ ORG &5500
 \  IF E% = 0 THEN ASSUME THE COMMAND IS SAFE TO ACTION
 
 ._ac_no_err
+    TXA
+    BEQ _ac_null
     CPX #12             \  back is a direction too
     BCS _ac_not_dir
 ._ac_dir
@@ -1728,11 +1730,11 @@ ALIGN &40
 .light
     EQUB 0
 .exits
-    EQUD 0:EQUD 0:EQUD 0
-.room_desc_addr
-    EQUW 0
+    EQUD 0:EQUD 0:EQUW 0
 .prev_rm
     EQUB 0
+.room_desc_addr
+    EQUW 0
 
 .cur_obj
     EQUB 0
