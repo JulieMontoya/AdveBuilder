@@ -444,7 +444,7 @@ ORG &5500
 
 .real_action_cmd
     LDX bas_var_V
-    BEQ _ac_null
+    BEQ _ac_not_live
 
     CPX #20             \  DIE pseudo-verb
     BNE _ac_not_die
