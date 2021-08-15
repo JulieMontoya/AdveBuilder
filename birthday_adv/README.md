@@ -19,7 +19,7 @@ the expected format, you will need to run
 ```
 sqlite3 birthday.sqlite3 < birthday.s3t
 make_huffman_tree6 -qbirthday -w
-pack_database4 -qbirthday -obirthday_data.6502
+pack_database4 -qbirthday -obirthday_data_eng5.6502
 beebasm -i abengine5.6502 -di birthday_empty.ssd -do birthday_adv.ssd
 ```
 
