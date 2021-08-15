@@ -108,7 +108,7 @@ text embossed into it: 'B.N. TO
 .C.I.A.E'
 ```
 
-In case it is still not obvious that this is a glowstick of the type beloved by ravers, attempting to `SHAKE` the tube produces this message:
+In case it is still not obvious that this is a glowstick of the type beloved by ravers which the player must `BEND` to activate, attempting to `SHAKE` the tube produces this message:
 
 ```
 You shake the tube, but the glass vial
@@ -124,7 +124,7 @@ react. It is now giving off a yellowish
 glow.
 ```
 
-_If the player has not solved this puzzle within a certain number of moves, a clue is automatically given:_
+If the player has not picked up the glowstick within six moves of entering the bare brick room, a clue is automatically given:
 
 ```
 You hear something! It sounds like your
@@ -135,11 +135,13 @@ still stuck, you need to use TAKE on its
 own.'
 ```
 
+This should help the player obtain the glowstick.
+
 Now the player has a light source, and will be able to see in the loft area a pair of baking tins  (which the player must `TAKE` to complete the game)  and an
-exit, with a last hint that the player had better make sure to collect everything they need as there will be no return.  The return path, including landing on
+  exit, with a last hint that the player had better make sure to collect everything they need as there will be no return.  The return path, including landing on
 the sofa in the blue room, might provide an additional hint to the player to try `SEARCH`ing the sofa if they have not done so already.
 
-_If the clue was given, a gratuitous message is displayed on the first turn_ after _landing on the sofa:_
+If the clue was given, a gratuitous message is displayed after landing on the sofa:
 
 ```
 Suddenly, a swirling time vortex opens
@@ -153,7 +155,7 @@ The time vortex closes as suddenly as it
 opened, and you snap back to normal.
 ```
 
-_To avoid creating unnecessary parallel universes, which might lead to stability problems in the event of improbability leaks, this is not displayed if the player managed to work out how to get the glowstick before the clue was deemed necessary._
+To avoid creating unnecessary parallel universes, which might lead to stability problems in the space-time continuum in the event of improbability leaks, this is not displayed if the player managed to work out for themself how to get the glowstick before the clue was deemed necessary.
 
 ## Puzzle Three: The Killer Hen
 
