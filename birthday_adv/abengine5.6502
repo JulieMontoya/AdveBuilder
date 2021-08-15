@@ -1220,7 +1220,7 @@ ALIGN &100
 ._clear_exits
     STA exits,X
     INX
-    CPX#11
+    CPX#10
     BCC _clear_exits
     
     JSR real_get_one_bit
