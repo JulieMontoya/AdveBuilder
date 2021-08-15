@@ -13,6 +13,10 @@ The object of the game is to bake a birthday cake.  This will require the player
 (baking tins)  as well as arranging an energy supply  (by finding a coin and inserting it into a gas meter).  Some locations are dark, and the player must
 locate a suitable light source to visit them without risking a fatal fall.
 
+(This is analogous to the classic adventure game concept where the player has to collect several treasures, bring them to a certain location and say a magic word to
+complete the game; the cake mix, egg and baking tins are the "treasures" that must be collected and brought to the kitchen, and the "magic word" is the command
+`BAKE CAKE`.)
+
 ## Ways to Die
 
 The player must avoid being pecked to death by a vicious mother hen, having the flesh eaten off their bones by dripping acid or falling and breaking their neck in
@@ -23,7 +27,8 @@ the dark.
 The player begins in the white room and can reach the kitchen, blue room, backyard and henhouse.  
 
 Rudimentary in-game assistance is provided by a `HELP` command; which generally just suggests `SEARCH`ing or `EXAMINE`ing things, but is also used to telegraph
-specific parts of the solution path to the player.
+specific parts of the solution path to the player: in a room where `SEARCH`ing something reveals an object, if the search has not yet been performed, `SEARCH` is
+suggested as a generic response.
 
 Discoveries can be made by `SEARCH`ing furniture mentioned in the descriptions.  In the kitchen, `SEARCH CUPBOARD` reveals a bag of bird seed and an instant cake
 mix.  If the latter is `EXAMINE`d, the player will see:
@@ -34,8 +39,7 @@ mix evenly between two cake tins and
 bake 15 minutes at no. 4.
 ```
 
-This should show the steps towards the final goal:  the player needs to locate an egg and some baking tins.  It's not unreasonable for the player to suppose that
-an egg is likely to be found in a henhouse.  However, this particular henhouse is dark, and any attempt to `TAKE` what is in there results in a suitably gory
+This should indicate the steps towards the final goal:  the player needs to locate an egg and some baking tins.  It's not unreasonable for the player to suppose that an egg is likely to be found in a henhouse.  However, this particular henhouse is dark, and any attempt to `TAKE` what is in there results in a suitably gory
 ending:
 
 ```
@@ -99,7 +103,9 @@ plastic tube, which can be `EXAMINE`d:
 ```
 The tube is made of soft translucent
 white plastic. It contains a liquid and
-a small glass vial.
+a small glass vial. There is some faint
+text embossed into it: 'B.N. TO
+.C.I.A.E'
 ```
 
 In case it is still not obvious that this is a glowstick of the type beloved by ravers, attempting to `SHAKE` the tube produces this message:
@@ -118,9 +124,36 @@ react. It is now giving off a yellowish
 glow.
 ```
 
+_If the player has not solved this puzzle within a certain number of moves, a clue is automatically given:_
+
+```
+You hear something! It sounds like your
+own voice, coming from very far away:
+'I don't know if you can hear this, but
+this is me from the future. If you are
+still stuck, you need to use TAKE on its
+own.'
+```
+
 Now the player has a light source, and will be able to see in the loft area a pair of baking tins  (which the player must `TAKE` to complete the game)  and an
 exit, with a last hint that the player had better make sure to collect everything they need as there will be no return.  The return path, including landing on
-the sofa in the blue room, might provide an additional hint to the player to `SEARCH` the sofa if they have not done so already.
+the sofa in the blue room, might provide an additional hint to the player to try `SEARCH`ing the sofa if they have not done so already.
+
+_If the clue was given, a gratuitous message is displayed on the first turn_ after _landing on the sofa:_
+
+```
+Suddenly, a swirling time vortex opens
+before you! You feel a strange
+compulsion to shout into it:
+'I don't know if you can hear this, but
+this is me from the future. If you are
+still stuck, you need to use TAKE on its
+own.'
+The time vortex closes as suddenly as it
+opened, and you snap back to normal.
+```
+
+_To avoid creating unnecessary parallel universes, which might lead to stability problems in the event of improbability leaks, this is not displayed if the player managed to work out how to get the glowstick before the clue was deemed necessary._
 
 ## Puzzle Three: The Killer Hen
 
