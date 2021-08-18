@@ -444,13 +444,14 @@ ORG &5500
 
 .real_action_cmd
     LDX bas_var_V
-    BEQ _ac_null
+    BEQ _ac_not_live
 
     CPX #20             \  DIE pseudo-verb
     BNE _ac_not_die
 ._ac_die
     JSR _ac_live
-    LDA #10
+    LDA #SM_GAME_OVER
+    STA bas_var_E
     JMP real_select_sysmsg
     
 ._ac_not_die
@@ -471,18 +472,25 @@ ORG &5500
 \  IF E% = 0 THEN ASSUME THE COMMAND IS SAFE TO ACTION
 
 ._ac_no_err
+    TXA
+    BEQ _ac_null
     CPX #12             \  back is a direction too
     BCS _ac_not_dir
 ._ac_dir
+    LDY bas_var_D       \  make sure destination is still valid
+    BEQ _ac_noexit
     LDA bas_var_R
     STA prev_rm
-    LDA bas_var_D
-    STA bas_var_R
+    STY bas_var_R
     JMP force_desc
 
 ._ac_null
     RTS
 
+._ac_noexit
+    LDA #SM_NO_EXIT     \  no exit
+    JMP real_select_sysmsg
+    
 ._ac_not_dir
     CPX #12
     BNE _ac_not_look
@@ -995,6 +1003,11 @@ ORG &5500
 ._lo3
     RTS
 
+\  INITIALISE THE GAME
+\
+\  START BY ZEROING OUT ALL THE STATE BITS, VISITED BITS AND STATE
+\  BYTE REGISTERS .....
+
 .real_init_game
     LDA #0
     TAX    
@@ -1002,12 +1015,22 @@ ORG &5500
     STA state_bits,X
     INX
     BPL _ig1
-    TAX
+
+\  ..... NOW WE NEED TO START OBJECTS OFF IN THEIR INITIAL LOCATIONS.
+\
+\  THERE IS NO OBJECT #0, SO WE USE POSITION 0 IN THE OBJECTS TABLE TO
+\  STORE A LIST OF THE INITIAL LOCATIONS OF EACH OBJECT.
+\  THE ENTRY AT POSITION 0 IN THIS LIST IS USED FOR NO. OF OBJECTS + 1
+\  (ADDING 1 SIMPLIFIES THE LOOP BUSTING TEST).
+
+    LDY #&FE            \  obj_table; A=0 still, this points to init_loc
+    JSR init_strm_ptr
+    LDY #0              \  [init_loc] => count of objects + 1
 ._ig2
-    LDA init_loc,X
-    STA object_loc,X
-    INX
-    CPX init_loc        \  this is also count of objects + 1
+    LDA (stream_ptr), Y
+    STA object_loc, Y
+    INY
+    CPY object_loc      \  see why we begin the list with its length? ;)
     BCC _ig2
     LDA #1              \  player starts in room #1
     STA bas_var_R
@@ -1060,11 +1083,13 @@ ALIGN &40
     LDA tempY
     ASL A               \  here C=1 if A was >= 128
     TAY                 \  now Y is 2 * what A used to be MOD 256
+    BCC _ip1            \  see if or not we need to .....
+    INC list_ptr+1      \    ..... add 256 to list_ptr
+._ip1    
     LDA (list_ptr),Y
     STA 0,X
     INY
-    LDA (list_ptr),Y    \  High byte may need to be altered
-    ADC #0              \  C is still set from above
+    LDA (list_ptr),Y
     STA 1,X
     RTS                 \  with Z=0
 
@@ -1074,9 +1099,9 @@ ALIGN &40
 \  A LIST OF LISTS.
 
 .init_list_ptr
-    LDA tables0,Y
+    LDA tree,Y
     STA list_ptr
-    LDA tables0+1,Y
+    LDA tree+1,Y
     STA list_ptr+1
     RTS
 
@@ -1219,7 +1244,7 @@ ALIGN &100
 ._clear_exits
     STA exits,X
     INX
-    CPX#11
+    CPX#10
     BCC _clear_exits
     
     JSR real_get_one_bit
@@ -1727,11 +1752,11 @@ ALIGN &40
 .light
     EQUB 0
 .exits
-    EQUD 0:EQUD 0:EQUD 0
-.room_desc_addr
-    EQUW 0
+    EQUD 0:EQUD 0:EQUW 0
 .prev_rm
     EQUB 0
+.room_desc_addr
+    EQUW 0
 
 .cur_obj
     EQUB 0
