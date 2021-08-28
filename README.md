@@ -14,6 +14,9 @@ that would spoil the fun.  So here is a link straight to the disc image
 so you can play it now and solve it on your own without seeing anything you
 don't want to.
 
+You can also [play in a web browser](https://earthshod.co.uk/~julie/jsbeeb/?disc1=birthday_adv.ssd&autoboot)
+powered by the excellent [JSBeeb emulator](https://github.com/mattgodbolt/jsbeeb).
+
 # src
 
 BeebAsm source code for the AdveBuilder game engine.
