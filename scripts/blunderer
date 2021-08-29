@@ -1,5 +1,5 @@
-#!/opt/local/bin/perl -w
 #!/usr/bin/perl -w
+#!/opt/local/bin/perl -w
 use strict;
 use constant { TRUE => "1", FALSE => "" };
 use DBI;
@@ -54,7 +54,7 @@ my $disconnect_exit = "DELETE FROM exits WHERE room=? AND direction=?";
 ############################  GET DIRECTION  VERBS  ############################
 
 $query = "SELECT verb,vn FROM verbs WHERE (LENGTH(verb)>2 OR vn>8) AND vn<11 "
-       . "ORDER BY vn";
+    . "ORDER BY vn";
 $sth = $dbh->prepare($query);
 
 $sth->execute;
@@ -81,6 +81,30 @@ sub opposite_dir {
 };
 
 ##########################  END FUNCTION DEFINITIONS  ##########################
+
+###############################  GET THE  VERBS  ###############################
+
+# @verbs = ( { "verb" => "SAFE", "vn" => 201 },
+#            { "verb" => "DANGEROUS", "vn" => 202 },
+#            { "verb" => "DESCRIBE", "vn" => 203 },
+#            { "verb" => "GOTO", "vn" => 204 } );
+
+$query = "SELECT verb,vn FROM verbs ORDER BY seq";
+$sth = $dbh->prepare($query);
+$sth->execute;
+while (($verb, $verb_no) = $sth->fetchrow_array) {
+    printf "%-32.32s    %ld\n", $verb, $verb_no;
+    push @verbs, { "verb" => $verb, "vn" => $verb_no };
+};
+$sth->finish;
+
+push @verbs, ( { "verb" => "SAFE", "vn" => 201 },
+               { "verb" => "DANGEROUS", "vn" => 202 },
+               { "verb" => "DESCRIBE", "vn" => 203 },
+               { "verb" => "GOTO", "vn" => 204 } );
+
+# print Dumper \@verbs;
+# exit;
 
 my $current_room = 1;
 my $show_desc = TRUE;
@@ -198,39 +222,53 @@ while (!$done) {
     };
 
     if ($DEBUG) {
-		if (defined $back) {
-			printf "|%s| / |%s| |%s|\n", $verb, $back, $noun;
-		}
-		else {
-			printf "|%s|%s|\n", $verb, $noun;
-		};
-	};
+        if (defined $back) {
+            printf "|%s| / |%s| |%s|\n", $verb, $back, $noun;
+        }
+        else {
+            printf "|%s|%s|\n", $verb, $noun;
+        };
+    };
 
     undef $verb_no;
     
     if ($verb) {
-        $sth_match_verb->execute("$verb%");
-        ($verb_no) = $sth_match_verb->fetchrow_array;
-        $sth_match_verb->finish;
+        # $sth_match_verb->execute("$verb%");
+        # ($verb_no) = $sth_match_verb->fetchrow_array;
+        # $sth_match_verb->finish;
+        foreach (@verbs) {
+            my $v = $_->{"verb"};
+            if ($v =~ /^$verb/) {
+                $verb_no = $_->{"vn"};
+                last;
+            };
+        };
 
         if ($back) {
-            $sth_match_verb->execute("$back%");
-            ($back_no) = $sth_match_verb->fetchrow_array;
-            $sth_match_verb->finish;
+            # $sth_match_verb->execute("$back%");
+            # ($back_no) = $sth_match_verb->fetchrow_array;
+            # $sth_match_verb->finish;
+            foreach (@verbs) {
+                my $v = $_->{"verb"};
+                if ($v =~ /^$back/) {
+                    $back_no = $_->{"vn"};
+                    last;
+                };
+            };
         }
         else {
             undef $back_no;
         };
 
-		if ($DEBUG) {
-			if ($verb_no && $back_no) {
-				printf "|%s|%d| / |%s|%d| |%s|\n", $verb, $verb_no,
-					$back, $back_no, $noun;
-			}
-			elsif ($verb_no) {
-				printf "|%s|%d|%s|\n", $verb, $verb_no, $noun;
-			};
-		};
+        if ($DEBUG) {
+            if ($verb_no && $back_no) {
+                printf "|%s|%d| / |%s|%d| |%s|\n", $verb, $verb_no,
+                    $back, $back_no, $noun;
+            }
+            elsif ($verb_no) {
+                printf "|%s|%d|%s|\n", $verb, $verb_no, $noun;
+            };
+        };
     };
 
     if (defined $verb_no) {
