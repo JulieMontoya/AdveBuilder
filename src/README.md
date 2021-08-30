@@ -122,7 +122,7 @@ This is a file consisting of constants with the numbers of stock messages.
 
 It is generated directly from the SQLite database using the following command:
 
-`$ echo 'SELECT id,tag FROM system_messages' | sqlite3 game_database.sqlite3 | awk '{printf "SM_%12s = %d\n", $2, $1}'`
+`$ echo 'SELECT * FROM system_messages' | sqlite3 game_database.sqlite3 | awk -F'|' '{printf "SM_%-12s = %d\n", $3, $1}' > stock_messages.6502`
 
 # abengine4.6502
 
