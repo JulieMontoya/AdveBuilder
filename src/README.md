@@ -116,6 +116,14 @@ This does likewise, but for the object whose ID is given in the X register  (`X%
     RTS
 ```
 
+# stock_messages.6502
+
+This is a file consisting of constants with the numbers of stock messages.
+
+It is generated directly from the SQLite database using the following command:
+
+`$ echo 'SELECT * FROM system_messages' | sqlite3 game_database.sqlite3 | awk -F'|' '{printf "SM_%-12s = %d\n", $3, $1}' > stock_messages.6502`
+
 # abengine4.6502
 
 This is an older version of the game engine which required the addresses of the database tables to be compiled into it.  In this version, the addresses are obtained from well-known locations in the game data file.
