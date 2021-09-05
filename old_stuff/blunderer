@@ -1,5 +1,5 @@
-#!/usr/bin/perl -w
 #!/opt/local/bin/perl -w
+#!/usr/bin/perl -w
 use strict;
 use constant { TRUE => "1", FALSE => "" };
 use DBI;
@@ -22,7 +22,7 @@ my $SAFE = !$OPTIONS{"D"};
 my $DEBUG = $OPTIONS{"d"};
 
 my ($description, @exits, $exits, $direction, @directions, $show_desc);
-my ($gap_size, $insert_pt, $last_room, $room, $noexit_no);
+
 my ($dbh, $query, $sth, @record, $count, $i, $success);
 
 if ($_ = $OPTIONS{"q"}) {
@@ -53,7 +53,8 @@ my $disconnect_exit = "DELETE FROM exits WHERE room=? AND direction=?";
 
 ############################  GET DIRECTION  VERBS  ############################
 
-$query = "SELECT verb,vn FROM verbs WHERE ((vn < 9 AND LENGTH(verb)>2) OR (vn>8 AND vn<11 AND LENGTH(verb)<5)) ORDER BY vn";
+$query = "SELECT verb,vn FROM verbs WHERE (LENGTH(verb)>2 OR vn>8) AND vn<11 "
+       . "ORDER BY vn";
 $sth = $dbh->prepare($query);
 
 $sth->execute;
@@ -80,48 +81,6 @@ sub opposite_dir {
 };
 
 ##########################  END FUNCTION DEFINITIONS  ##########################
-
-###############################  GET THE  VERBS  ###############################
-
-@verbs = ( { "verb" => "NORTH", "vn" => 1 },
-           { "verb" => "EAST", "vn" => 3 },
-           { "verb" => "SOUTH", "vn" => 5 },
-           { "verb" => "WEST", "vn" => 7 },
-           { "verb" => "NE", "vn" => 2 },
-           { "verb" => "NORTHEAST", "vn" => 2 },
-           { "verb" => "SE", "vn" => 4 },
-           { "verb" => "SOUTHEAST", "vn" => 4 },
-           { "verb" => "SW", "vn" => 6 },
-           { "verb" => "SOUTHWEST", "vn" => 6 },
-           { "verb" => "NW", "vn" => 8 },
-           { "verb" => "NORTHWEST", "vn" => 8 },
-           { "verb" => "UP", "vn" => 9 },
-           { "verb" => "CLIMB", "vn" => 9 },
-           { "verb" => "DOWN", "vn" => 10 },
-           { "verb" => "DESCEND", "vn" => 10 },
-           { "verb" => "SAFE", "vn" => 201 },
-           { "verb" => "DANGEROUS", "vn" => 202 },
-           { "verb" => "DESCRIBE", "vn" => 203 },
-           { "verb" => "GOTO", "vn" => 204 },
-           { "verb" => "INSERT", "vn" => 205 },
-           { "verb" => "NOEXIT", "vn" => 206 });
-
-# $query = "SELECT verb,vn FROM verbs ORDER BY seq";
-# $sth = $dbh->prepare($query);
-# $sth->execute;
-# while (($verb, $verb_no) = $sth->fetchrow_array) {
-#     printf "%-32.32s    %ld\n", $verb, $verb_no;
-#     push @verbs, { "verb" => $verb, "vn" => $verb_no };
-# };
-# $sth->finish;
-# 
-# push @verbs, ( { "verb" => "SAFE", "vn" => 201 },
-#                { "verb" => "DANGEROUS", "vn" => 202 },
-#                { "verb" => "DESCRIBE", "vn" => 203 },
-#                { "verb" => "GOTO", "vn" => 204 } );
-
-# print Dumper \@verbs;
-# exit;
 
 my $current_room = 1;
 my $show_desc = TRUE;
@@ -239,53 +198,39 @@ while (!$done) {
     };
 
     if ($DEBUG) {
-        if (defined $back) {
-            printf "|%s| / |%s| |%s|\n", $verb, $back, $noun;
-        }
-        else {
-            printf "|%s|%s|\n", $verb, $noun;
-        };
-    };
+		if (defined $back) {
+			printf "|%s| / |%s| |%s|\n", $verb, $back, $noun;
+		}
+		else {
+			printf "|%s|%s|\n", $verb, $noun;
+		};
+	};
 
     undef $verb_no;
     
     if ($verb) {
-        # $sth_match_verb->execute("$verb%");
-        # ($verb_no) = $sth_match_verb->fetchrow_array;
-        # $sth_match_verb->finish;
-        foreach (@verbs) {
-            my $v = $_->{"verb"};
-            if ($v =~ /^$verb/) {
-                $verb_no = $_->{"vn"};
-                last;
-            };
-        };
+        $sth_match_verb->execute("$verb%");
+        ($verb_no) = $sth_match_verb->fetchrow_array;
+        $sth_match_verb->finish;
 
         if ($back) {
-            # $sth_match_verb->execute("$back%");
-            # ($back_no) = $sth_match_verb->fetchrow_array;
-            # $sth_match_verb->finish;
-            foreach (@verbs) {
-                my $v = $_->{"verb"};
-                if ($v =~ /^$back/) {
-                    $back_no = $_->{"vn"};
-                    last;
-                };
-            };
+            $sth_match_verb->execute("$back%");
+            ($back_no) = $sth_match_verb->fetchrow_array;
+            $sth_match_verb->finish;
         }
         else {
             undef $back_no;
         };
 
-        if ($DEBUG) {
-            if ($verb_no && $back_no) {
-                printf "|%s|%d| / |%s|%d| |%s|\n", $verb, $verb_no,
-                    $back, $back_no, $noun;
-            }
-            elsif ($verb_no) {
-                printf "|%s|%d|%s|\n", $verb, $verb_no, $noun;
-            };
-        };
+		if ($DEBUG) {
+			if ($verb_no && $back_no) {
+				printf "|%s|%d| / |%s|%d| |%s|\n", $verb, $verb_no,
+					$back, $back_no, $noun;
+			}
+			elsif ($verb_no) {
+				printf "|%s|%d|%s|\n", $verb, $verb_no, $noun;
+			};
+		};
     };
 
     if (defined $verb_no) {
@@ -410,7 +355,7 @@ while (!$done) {
                 $show_desc = TRUE;
             };
         }
-        ############################  204 =>  GOTO  ############################
+        ############################  201 =>  GOTO  ############################
         elsif ($verb_no == 204) {
             $dest = $noun + 0;
             $sth_check_room->execute($dest);
@@ -425,70 +370,8 @@ while (!$done) {
                 undef $description;
                 $show_desc = TRUE;
             };
-        }
-        ###########################  205 =>  INSERT  ###########################
-        elsif ($verb_no == 205) {
-            if ($SAFE) {
-                print "You cannot insert rooms in safe mode!\n";
-            }
-            else {
-                #  gap size
-                if (defined $noun && $noun =~ /^\d+$/) {
-                    $gap_size = $noun;
-                }
-                else {
-                    $gap_size = 1;
-                };
-                $insert_pt = $current_room + 1;
-
-                #  To keep the unique constraint, we have to renumber rooms one at
-                #  a time, starting from the highest number and working down.
-                
-                $query = "SELECT id FROM rooms ORDER BY id DESC LIMIT 1";
-                $sth = $dbh->prepare($query);
-                $sth->execute;
-                ($last_room) = $sth->fetchrow_array;
-                $sth->finish;
-                
-                #  update rooms.id
-                #  update exits.dest
-                #  update exits.room
-                foreach $query ( "UPDATE rooms SET id=id+$gap_size WHERE id=?",
-                                "UPDATE exits SET dest=dest+$gap_size WHERE dest=?",
-                                "UPDATE exits SET room=room+$gap_size WHERE room=?" ) {
-                    for ($room = $last_room; $room >= $insert_pt; --$room) {
-                        $dbh->do($query, undef, $room);
-                    };
-                };
-                #  insert new rooms
-                $query = "INSERT INTO rooms(id,description) VALUES(?,'')";
-                for ($room = $insert_pt; $room < $insert_pt + $gap_size; ++$room) {
-                    $dbh->do($query, undef, $room);
-                };
-            };
-        }
-        ###########################  206 =>  NOEXIT  ###########################
-        elsif ($verb_no == 206) {
-            if ($SAFE) {
-                print "You cannot remove exits in safe mode!\n";
-            }
-            elsif ($noun) {
-                undef $noexit_no;
-                foreach (@verbs) {
-                    my $v = $_->{"verb"};
-                    if ($v =~ /^$noun/) {
-                        $noexit_no = $_->{"vn"};
-                        last;
-                    };
-                };
-                if ($noexit_no) {
-                    print "No exit: '$noexit_no' from '$current_room'\n";
-                    $query = "DELETE FROM exits WHERE room=? AND direction=?";
-                    $dbh->do($query, undef, $current_room, $noexit_no);
-                };
-            };
-            
         };
+    
     };
     
     if ($auto_safe) {
