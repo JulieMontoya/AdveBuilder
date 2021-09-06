@@ -47,3 +47,18 @@ objects and messages for _Birthday Adventure_.
 ## abengine2.6502
 
 Old file.
+
+# Game State Registers
+
+Register | Description         | Meaning
+--------:|---------------------|----------------------------------------------------
+B1       | Umbrella state      | 0 => Unbrella is closed; 1 => Umbrella is open
+B4       | Kitchen cupboard    | 1 => Cupboard searched, bird seed + cake mix found
+B5       | White Room Cupboard | 1 => Cupboard searched, gas meter found
+B6       | Sofa state          | 1 => Sofa searched, coin found
+B7       | Gas meter state     | 1 => Coin inserted
+B9       | Light source state  | 1 => Glowstick activated
+B11      | Hen state           | 1 => Bird seed dropped, hen eating it
+B12      | Clue state          | 1 => Message from future delivered
+B13      | Timeline state      | 1 => Message sent through time vortex into past
+C3       | Trapped count       | Number of turns trapped in rooms 4-6
