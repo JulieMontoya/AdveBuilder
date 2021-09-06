@@ -52,7 +52,7 @@ Old file.
 
 Register | Description         | Meaning
 --------:|---------------------|----------------------------------------------------
-B1       | Umbrella state      | 0 => Unbrella is closed; 1 => Umbrella is open
+B1       | Umbrella state      | 0 => Umbrella is closed; 1 => Umbrella is open
 B4       | Kitchen cupboard    | 1 => Cupboard searched, bird seed + cake mix found
 B5       | White Room Cupboard | 1 => Cupboard searched, gas meter found
 B6       | Sofa state          | 1 => Sofa searched, coin found
