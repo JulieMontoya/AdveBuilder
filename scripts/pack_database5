@@ -12,16 +12,21 @@ my $DB_USER = "julie";
 my $DB_PASS = "clamdigger";
 
 my %OPTIONS;
-getopts "L:o:p:q:v", \%OPTIONS;
+getopts "L:o:p:q:s:v", \%OPTIONS;
 
 my $ROOM_PREFIX  = $OPTIONS{"p"} || "room";
 my $OUTPUT_FILE  = $OPTIONS{"o"};
 my $LIGHT_LEVELS = $OPTIONS{"L"} // 2;
+my $STATS_FILE   = $OPTIONS{"s"};
 my $VERBOSE      = $OPTIONS{"v"};
+
+if ($STATS_FILE) {
+    $STATS_FILE .= ".csv" unless $STATS_FILE =~ /\.csv/;
+};
 
 my ($offset, $dest, $byte, $char, $chars, $direction, @directions, $description);
 my ($asm, $cmt, $rooms_data, $tree, $rooms_table, $light, $msg_table, $msg_id,
-    $message, $msg_data);
+    $message, $msg_data, @msg_data, @stats, $name);
 my ($word, $wn, $verb_list, $noun_list);
 my ($obj_table, $obj_data, $init_table, $obj_id, $start_room, $can_carry,
     $states, $state_byte, $desc_carried, $desc_in_room, $exam_msg, $em_type,
@@ -48,6 +53,8 @@ else {
     $dbh = DBI->connect("DBI:mysql:database=$DB_NAME;host=$DB_HOST",
                         "$DB_USER","$DB_PASS");
 };
+
+my (@subtotal, @group, $orig_length, $comp_length, $saving);
 
 my ($node, $left_child, $left_is_payload, $right_child, $right_is_payload,
     $left_char, $right_char);
@@ -90,6 +97,11 @@ my $get_nouns = "SELECT noun,nn FROM nouns WHERE nn<128 ORDER BY seq";
 my $sth_get_nouns = $dbh->prepare($get_nouns);
 
 my (%path_to_char, $data);
+
+my $row = 1;    #  spreadsheets do not have a row 0
+
+my $orig_total = 0;
+my $comp_total = 0;
 
 #########################  BEGIN FUNCTION DEFINITIONS  #########################
 
@@ -165,6 +177,17 @@ sub compress {
     #print "\n---- ends ----\n";
 
     $chars;
+};
+
+sub column_sum {
+    my $col = shift;
+    my $sep = "";
+    my $ans = "=";
+    foreach (@_) {
+        $ans .= "${sep}${col}$_";
+        $sep = "+";
+    };
+    $ans;
 };
 
 ##########################  END FUNCTION DEFINITIONS  ##########################
@@ -244,6 +267,9 @@ $tree .= "._tree_end\n";
 $rooms_table = ".room_table\n";
 $rooms_table .= sprintf "    EQUW %s1\n", $ROOM_PREFIX;
 
+$orig_total = $comp_total = 0;
+@group = ();
+
 $sth_get_rooms->execute;
 while (($cur_room, $light) = $sth_get_rooms->fetchrow_array) {
     $bits = "";
@@ -306,6 +332,7 @@ while (($cur_room, $light) = $sth_get_rooms->fetchrow_array) {
 
     print "\n";
 
+    $comp_length = length $chars;
     $asm = make_equb $chars;
     printf ".%s%d\n", $ROOM_PREFIX, $cur_room;
     print "$asm\n";
@@ -322,19 +349,33 @@ while (($cur_room, $light) = $sth_get_rooms->fetchrow_array) {
     $sth_get_room->finish;
     
     print "$description\n";
-    
+    $orig_length = length $description;
     printf ".ldesc%d\n", $cur_room;
     $rooms_data .= sprintf ".ldesc%d\n", $cur_room;
 
     $data = compress "$description\n";
+    $comp_length += length $data;
     # ++$i;
     $asm = make_equb $data;
 
     print $asm;
     $rooms_data .= $asm;
+    push @stats, ["$ROOM_PREFIX$cur_room", 1 + $orig_length, $comp_length,
+                  "=B$row-C$row", "=D$row/B$row"];
+    $orig_total += 1 + $orig_length;
+    $comp_total += $comp_length;
+    push @group, $row++;
 };
 
 $sth_get_rooms->finish;
+
+#push @stats, ["${ROOM_PREFIX}_total", $orig_total, $comp_total,
+#              "=B$row-C$row", "=D$row/B$row"];
+push @stats, ["${ROOM_PREFIX}_total", column_sum("B", @group), column_sum("C", @group),
+              "=B$row-C$row", "=D$row/B$row"];
+push @subtotal, $row++;
+push @stats, [];
+++$row;
 
 $rooms_data .= "._rooms_end\n";
 $rooms_table .= "._room_table_end\n";
@@ -346,6 +387,9 @@ print $rooms_data;
 
 $msg_table .= ".msg_table\n";
 
+$orig_total = $comp_total = 0;
+@group = ();
+
 $sth_get_messages->execute;
 while (($msg_id, $message) = $sth_get_messages->fetchrow_array) {
     $msg_table .= sprintf "    EQUW msg%d\n", $msg_id;
@@ -355,14 +399,35 @@ while (($msg_id, $message) = $sth_get_messages->fetchrow_array) {
 
     $data = compress "$message\n";
     $asm = make_equb $data;
-    
+
+    #$msg_data[$msg_id]->{"orig_length"} = 1 + length $message;
+    #$msg_data[$msg_id]->{"comp_length"} = length $data;
+    $orig_length = 1 + length $message;
+    $comp_length = length $data;
     print $asm;
     $msg_data .= $asm;
+
+    $orig_total += 1 + $orig_length;
+    $comp_total += $comp_length;
+    push @stats, ["msg$msg_id", 1 + $orig_length, $comp_length,
+                  "=B$row-C$row", "=D$row/B$row"];
+    push @group, $row++;
 };
 $sth_get_messages->finish;
-
 $msg_data .= "._messages_end\n";
+
+#push @stats, ["msg_total", $orig_total, $comp_total,
+#              "=B$row-C$row", "=D$row/B$row"];
+push @stats, ["msg_total", column_sum("B", @group), column_sum("C", @group),
+              "=B$row-C$row", "=D$row/B$row"];
+push @subtotal, $row++;
+push @stats, [];
+++$row;
+
 $msg_table .= ".smsg_table\n";
+
+$orig_total = $comp_total = 0;
+@group = ();
 
 $sth_get_sysmsgs->execute;
 while (($msg_id, $message) = $sth_get_sysmsgs->fetchrow_array) {
@@ -373,11 +438,26 @@ while (($msg_id, $message) = $sth_get_sysmsgs->fetchrow_array) {
 
     $data = compress "$message\n";
     $asm = make_equb $data;
-    
+    $orig_length = 1 + length $message;
+    $comp_length = length $data;
     print $asm;
     $msg_data .= $asm;
+
+    $orig_total += 1 + $orig_length;
+    $comp_total += $comp_length;
+    push @stats, ["smsg$msg_id", 1 + $orig_length, $comp_length,
+                  "=B$row-C$row", "=D$row/B$row"];
+    push @group, $row++;
 };
 $sth_get_sysmsgs->finish;
+
+#push @stats, ["smsg_total", $orig_total, $comp_total,
+#              "=B$row-C$row", "=D$row/B$row"];
+push @stats, ["smsg_total", column_sum("B", @group), column_sum("C", @group),
+              "=B$row-C$row", "=D$row/B$row"];
+push @subtotal, $row++;
+push @stats, [];
+++$row;
 
 $msg_data .= "._sysmssgs_end\n";
 $msg_table .= "._msg_table_end\n";
@@ -394,6 +474,9 @@ print ".obj_table\n";
 $obj_table = ".obj_table\n    EQUW init_loc\n";
 $init_table = sprintf ".init_loc\n    EQUB %-3d  \\ number of objects+1\n", $count + 1;
 
+$orig_total = $comp_total = 0;
+@group = ();
+
 $sth_get_objects->execute;
 while (($obj_id, $start_room, $can_carry, $states, $state_byte, $desc_carried,
        $desc_in_room, $exam_msg) = $sth_get_objects->fetchrow_array) {
@@ -409,6 +492,8 @@ while (($obj_id, $start_room, $can_carry, $states, $state_byte, $desc_carried,
     #  IN-ROOM VERSION OF DESCRIPTION, FOLLOWED BY NEWLINE
     
     $in_room_data = compress "$desc_in_room\n";
+    
+    $orig_length = (length $desc_carried) + length $desc_in_room;
     
     #  "EXAMINE" MESSAGE
     
@@ -446,6 +531,7 @@ while (($obj_id, $start_room, $can_carry, $states, $state_byte, $desc_carried,
     }
     elsif ($exam_msg =~ /\D/) {     #  message text
         $em_type = 1;
+        $orig_length += 1 + length $exam_msg;
         $exam_data = compress "$exam_msg\n";
         $bits .= "10 " . sprintf("%08b", length $in_room_data);
         print "$exam_msg\n"         if $VERBOSE;
@@ -472,6 +558,7 @@ while (($obj_id, $start_room, $can_carry, $states, $state_byte, $desc_carried,
 
     print "\n";
     
+    $comp_length = length $chars;
     $asm = make_equb $chars;
     $asm .= sprintf "    EQUB obj%dl-obj%ds\n", $obj_id, $obj_id;
     printf ".obj%d\n", $obj_id;
@@ -479,12 +566,14 @@ while (($obj_id, $start_room, $can_carry, $states, $state_byte, $desc_carried,
     print $asm;
     $obj_data .= $asm;
 
+    $comp_length += length $carried_data;
     $asm = make_equb $carried_data;
     printf ".obj%ds\n", $obj_id;
     $obj_data .= sprintf ".obj%ds\n", $obj_id;
     print $asm;
     $obj_data .= $asm;
 
+    $comp_length += length $in_room_data;
     $asm = make_equb $in_room_data;
     printf ".obj%dl\n", $obj_id;
     $obj_data .= sprintf ".obj%dl\n", $obj_id;
@@ -492,14 +581,29 @@ while (($obj_id, $start_room, $can_carry, $states, $state_byte, $desc_carried,
     $obj_data .= $asm;
 
     if ($em_type == 1) {
+        $comp_length += length $exam_data;
         $asm = make_equb $exam_data;
         printf ".obj%de\n", $obj_id;
         $obj_data .= sprintf ".obj%de\n", $obj_id;
         print $asm;
         $obj_data .= $asm;
     };
+
+    $orig_total += 1 + $orig_length;
+    $comp_total += $comp_length;
+    push @stats, ["obj$obj_id", 1 + $orig_length, $comp_length,
+                  "=B$row-C$row", "=D$row/B$row"];
+    push @group, $row++;
 };
 $sth_get_objects->finish;
+
+#push @stats, ["obj_total", $orig_total, $comp_total,
+#              "=B$row-C$row", "=D$row/B$row"];
+push @stats, ["obj_total", column_sum("B", @group), column_sum("C", @group),
+              "=B$row-C$row", "=D$row/B$row"];
+push @subtotal, $row++;
+push @stats, [];
+++$row;
 
 # print "\n\n\n";
 # 
@@ -518,7 +622,7 @@ while (($word, $wn) = $sth_get_verbs->fetchrow_array) {
     $verb_list .= sprintf "    EQUB &%02X:EQUS\"%s\"\n", $wn | 0x80, $word;
 };
 
-$verb_list .= "._verb_list_end\n";
+$verb_list .= "    BRK\n._verb_list_end\n";
 
 #################################  GET  NOUNS  #################################
 
@@ -529,7 +633,7 @@ while (($word, $wn) = $sth_get_nouns->fetchrow_array) {
     $noun_list .= sprintf "    EQUB &%02X:EQUS\"%s\"\n", $wn | 0x80, $word;
 };
 
-$noun_list .= "._noun_list_end\n";
+$noun_list .= "    BRK\n._noun_list_end\n";
 
 
 if ($OUTPUT_FILE) {
@@ -575,6 +679,46 @@ _STOP_
     close FH;
 };
 
+$orig_total = $comp_total = 0;
+
+# for ($i = 0; $i < @msg_data; ++$i) {
+    #$orig_length = $msg_data[$i]->{"orig_length"};
+    #$comp_length = $msg_data[$i]->{"comp_length"};
+# };
+for ($i = 0; $i < @stats; ++$i) {
+    ($name, $orig_length, $comp_length) = @{$stats[$i]};
+    if ($name) {
+    #unless ($name =~ /_total$/) {
+        if ($orig_length =~ /^\d+$/) {
+            $orig_total += $orig_length;
+            $comp_total += $comp_length;
+            $saving = $orig_length - $comp_length;
+            if ($VERBOSE) {
+                printf "%6d  %-12.12s  %6d  %6d  %6d  %.2f\n",
+                    $i + 1, $name, $orig_length, $comp_length, $saving, 
+                    100 * ($saving / $orig_length);
+            };
+        };
+    };
+};
+$saving = $orig_total - $comp_total;
+if ($VERBOSE) {
+    printf "        TOTAL         %6d  %6d  %6d  %.2f\n",
+        $orig_total, $comp_total, $saving, 100 * ($saving / $orig_total);
+};
+push @stats, ["TOTAL", column_sum("B", @subtotal), column_sum("C", @subtotal),
+              "=B$row-C$row", "=D$row/B$row"];
+++$row;
+
 $dbh->disconnect;
+
+if ($STATS_FILE) {
+    open CSV, ">", $STATS_FILE or die "Could not open $STATS_FILE: $!";
+    foreach (@stats) {
+        print CSV join ",", @{$_};
+        print CSV "\n";
+    };
+    close CSV;
+};
 
 exit;
