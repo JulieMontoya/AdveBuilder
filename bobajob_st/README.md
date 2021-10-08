@@ -10,3 +10,5 @@ Mend leaking pipe
 Water pot plant
 ```
 Good, honest, old-fashioned odd jobs for the odd bob.  Surely nothing can go wrong?  Nothing on that list sounds dangerous; and in any case, the old cat lady, the nice young family, the shopkeeper and the softly-spoken gentleman with the long, grey hair will be there to show you where to find everything .....
+
+Bobajob Street was written to test polystate objects and also introduce the ideas of "container" objects and non-player characters.  It ended up taking a darker turn  ;)
