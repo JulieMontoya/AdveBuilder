@@ -8,7 +8,7 @@ The game world consists of just 16 rooms (of which one is actually the inside of
 
 ## The Back Story
 
-A crazy old cat lady, a mother of a hyperactive child, a shopkeeper and an ageing hippy have engaged the player to perform some simple odd jobs.
+A crazy old cat lady, a mother of a hyperactive child, a shopkeeper and an ageing hippy have engaged the player, via an unusual employment agency, to perform some simple odd jobs.
 
 ## Object of the Game
 
@@ -20,7 +20,9 @@ Mend leaking pipe
 Water pot plant
 ```
 
-It becomes obvious at once that something is not right.  Nobody answers when the player knocks on a door.  The houses are unlocked, allowing the player to wander in and out.  The first house has
+As the player wanders about, it soon becomes obvious that something is not quite right.  Nobody answers when the player knocks on a door.  The houses are unlocked, allowing the player to wander in and out.  The shop and library are closed.  Where is everyone?
+
+The first house has
 ```
 You are in a cluttered room, absoulutely
 stuffed with paintings of cats,
@@ -58,17 +60,21 @@ After `FEED TIGER`, `FEED TIDDLES` or `USE MILK`, the player has limited turns b
 
 At the second house, nobody is at home.  This house has two rooms.  Upstairs is a child's bedroom with a sleeping bag.  The library book is hidden in there  (the child must have been reading it in bed .....)  and can be found in one of two ways; either using `SEARCH BAG`, or by entering `GET INSIDE BAG`.  It's dark inside the sleeping bag, but `TAKE` on its own  (as in _Birthday Adventure_ or _Philosopher's Quest_)  finds something which is identified as a book when the player goes `BACK` to the room.
 
+Once the player has the book, it must be returned to the library and exchanged for some chewing gum; which is then used to mend the leaking pipe which will be found in flat 3A.
+
 The next building is a newsagent's shop; an alley and a metal staircase give access to a dingy flat above the shop, which  (surprisingly enough)  is unoccupied but has a very obvious leaking pipe.  However, there is no sign of the newsagent, who was supposed to have all the necessary tools and parts.
 
 If the player attempts to `MEND PIPE` at this stage, they will be told:
 
 ```
-you will need something soft and squidgy
+You will need something soft and squidgy
 to plug up the hole, and something to
 wrap around it while it sets hard.
 ```
 
-If they still have the empty milk bottle, they can `FILL BOTTLE` with water from the sink.
+If the player still has the empty milk bottle, they can `FILL BOTTLE` with water from the sink.
+
+The last house contains a pot plant  (in more senses, it is suggested, than just one .....)  which needs to be watered; but, for some reason best left known to the programmer, there is no source of water.
 
 ```
 You are in a dimly-lit room with
@@ -106,13 +112,13 @@ and sticking plasters.
 It's tuned to an oldies station.
 ```
 
-The Elvis song is a not-very-useful clue about tigers.  The comedy ballad is a more useful clue how to mend the pipe.
+The Elvis song is a not-very-useful clue about tigers  (the player may well already have found out the hard way anyway).  The comedy ballad is a more useful clue how to mend the pipe.
 
 In order to be able to `WATER PLANT` and complete the fourth job, the player must have fed Tiddles and refilled the empty milk bottle with water.
 
-The last building in the street proper is the library.  This, too, is closed; but reading the sign on the door will reveal an additional exit from the base of the steps, which leads to a self-service book deposit machine.  Here the player is clued to `SCAN BOOK` to open the depository slot, and `INSERT BOOK` to complete job number two.  The machine also offers a free gift, which turns out to be a stick of chewing gum.  To the `EAST` of the book deposit machine is a grassy knoll, and a first-aid kit which may be `SEARCH`ed to reveal a sticking plaster.
+The last building in the street proper is the library.  This, too, is closed; but reading the sign on the door will reveal an additional exit from the base of the steps, which leads to a self-service book deposit machine.  Here the player is clued to `SCAN BOOK` to open the depository slot, and `INSERT BOOK` to complete job number two.  The machine also offers a free gift, which turns out to be a stick of chewing gum.  To the `EAST` of the book deposit machine is a grassy knoll; here there is also a first-aid kit, which may be `SEARCH`ed to reveal a sticking plaster and a (useless) empty pill packet.
 
-The player can now go to the flat, `CHEW GUM` until it is soft and squidgy, and `MEND PIPE`  (using the soft, squidgy gum to plug up the hole and wrapping the sticking plaster around to hold it in place while it sets hard)  to complete the third job.
+The player can now go to the flat, `CHEW GUM` until it is soft and squidgy, and `MEND PIPE`  (using the soft, squidgy gum to plug up the hole in the pipe and wrapping the sticking plaster around to hold it in place while it sets hard)  to complete the third job.
 
 After completing all four tasks, the player has been led to believe the driver from the agency will return to collect them and the game is won .....  But instead, an extra job is discovered on the reverse of the list:
 
@@ -120,4 +126,28 @@ After completing all four tasks, the player has been led to believe the driver f
 Defeat the crazed chainsaw-wielding serial killer who has been terrorising the villagers
 ```
 
+The killer starts from the grassy knoll and chases the player down. If the killer is in the same room as the player, he will miss on the first turn but succeed on the second, and the game is over.
 
+To complete the game, the player has to return to the child's bedroom and `GET INSIDE BAG`.  The killer will chase the player down and attempt to cut them out of the sleeping bag; whereupon the chainsaw will snag on the polyester fibres, which will melt, gum up the chain and stop the engine with a loud BANG.*  Now disarmed, the killer panics and runs away.  The closing message tells what happened while the player was inside the sleeping bag:
+
+A police officer explains how the killer ran away and tried to hide inside Mrs Partridge's house, where Tiddles was found playing with him! Mr French the newsagent recognised the killer as his tenant! Young Bobby Turtledove now has an excuse to tidy his bedroom. There is no sign of Mr Colley anywhere .....
+
+## Ways to Die
+
+The player can be killed by the tiger, if they try to stroke it while it is drinking its milk or if it finishes its milk.  It is also possible to make the game unwinnable by leaving the empty bottle behind and not having sufficient turns available to retrieve it.  After this task is done, everything is fairly benign until all the initial tasks have been completed; then there is a possibility of being chopped to pieces by the evil chainsaw-wielding maniac.
+
+## Clues and trivia
+
++ The list of jobs must be read to show notifications of tasks completed.
++ The note gives some important information about Tiddles.
++ There are two ways to get the book: the player can either get inside the bag and find it, or `SEARCH BAG`.
++ `EXAMINE BOOK` reveals a barcode, as well as providing a clue about chainsaws and sleeping bags.
++ The responses to `MEND PIPE` without the necessary items, and the radio in house #4, provide clues how to deal with the pipe.
++ Refilling the bottle is a reference to the original _Colossal Cave_ adventure.  (It's also an example of a polystate object!)
++ `EXAMINE MACHINE` reveals a barcode scanner, and `SCAN` is suggested as a verb in one of the generic `HELP` messages, so the player knows how to complete task 2.
++ The grassy knoll is a reference to the assassination of John F. Kennedy.
+
+
+```
+* While this is believed to work, the author does not recommend testing it.  No responsibility is accepted for any damage occurring to your chainsaw, your sleeping bag or yourself.
+ ```
