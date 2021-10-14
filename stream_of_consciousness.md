@@ -33,3 +33,23 @@ Alternatively:  Bit-packed search table.
 
 + 0 + 8 bits => object to release (last one)
 + 1 + 8 bits => object to release (followed by same again)
+
+## Container Logic
+
+Add helper functions, and possibly extend built-in commands, to implement containers: objects which can have other objects placed inside and retrieved from them.
+
+Put objects into container  (`FILL container`, `STUFF container`):  list objects in-hand  (skipping the container itself)  one by one and offer Y/n.  Return to BASIC after each "yes" to allow program to deal with cases where objects will not fit or objects which will damage the container e.g. burning oil lamps, sharp blades.  Last time through should signal no more objects.
+
+`PUT object [INTO] container` would set `M%<>N%` to distinguish from ordinary `PUT`.  (Unfortunately, the first-second-last parser has no way to distinguish between `STUFF TURKEY [INSIDE] PILLOWCASE` and `STUFF TURKEY [WITH] PILLOWCASE`; if `STUFF` is a simple synonym for `FILL` with the same verb number to make the two-word case behave identically then the latter is assumed, but `PUT TURKEY INSIDE PILLOWCASE` works the opposite way around.)  At checking stage, if M%<>N% then `M%` must be in-hand  (or else **NO_CARRY**)  and `N%` must be in-hand or in-room  (or else **NOT_HERE**).  On actioning command, if `M%<>N%` then we need to relocate object `M%` to an alternative room which might be given in another BASIC variable, or else somehow determined from `N%`.
+
+`INSERT object [INTO] container` could be made a built-in; check always passes if `M%=N%`  (`INSERT OBJECT`)  to allow BASIC program to deal with this form of command, otherwise acts as `PUT object [INTO] container`.
+
+`TAKE object [FROM] container` would set `M%<>N%` to distinguish from ordinary `TAKE`.  At checking stage, if a means exists to determine the container's associated virtual room directly from `N%`, we can check the wanted object's availability automatically and maybe set **NOT_HERE**.  If `M%` is the token for the word `FROM`  (analogously with naked `TAKE`)  then we need to pick `M%` from the contained objects.  On actioning command, if `M%<>N%` then we need to relocate object `M%` to the player's hands  (i.e., room 0).
+
+List objects in container:  like main loop of `INVENTORY` command, expecting program to provide preamble and "empty" message if applicable.
+
+Count  (without displaying)  objects in container:  necessary in order to implement some logic, e.g. it might not be possible to fold a free-standing tent while there is something inside it.  
+
+Might be possible to merge some of this with any `SEARCH` built-in.  `SEARCH`ing a container should release its contents, either to the player's hands if carried, or else to the room.  `EXAMINE`ing it should list them.
+
+Worth adding "container" property to objects? 0 => not container, 1 + 8 bits => room where its contents are.  Will need to see if room for extra bit in padding bits in common object record sizes .....
