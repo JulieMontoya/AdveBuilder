@@ -11,6 +11,12 @@
 + Extend database format to include support for short and long descriptions for previously visited and unvisited rooms respectively.
 + **DONE** Make `DIE` a built-in command.  Would not accessed directly by typing a command, but by BASIC program altering `V%`.  Use `M%` to specify dying message, and set `E%`=**GAME_OVER** to satisfy `UNTIL` condition.  DONE -- also added `LIVE` built-in command.
 
+## Extensions to text uncompression
+
++ Use `CHR$(6)` (invisible when PRINTed) as "shift on" command instead of encoding capital letters explicitly.  (Check whether this gives any space saving.)
++ Introduce tokens which can be expanded. `CHR$(16)` to `CHR$(31)` could be used  (easy enough to check, still out of way of anything else we are trapping).  Use slack space after tree to store token expansions, pass offset via 1 byte in last page. To save space, instead of a table of addresses, use bit 7=1 to indicate beginning or end of a token and search forwards from beginning every time. 
+
+
 ## SEARCH TABLE
 Byte offset | Meaning
 ------------|-------------------------------------------------------------
