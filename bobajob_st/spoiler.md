@@ -118,9 +118,24 @@ In order to be able to `WATER PLANT` and complete the fourth job, the player mus
 
 The last building in the street proper is the library.  This, too, is closed; but reading the sign on the door will reveal an additional exit from the base of the steps, which leads to a self-service book deposit machine.  Here the player is clued to `SCAN BOOK` to open the depository slot, and `INSERT BOOK` to complete job number two.  The machine also offers a free gift, which turns out to be a stick of chewing gum.  To the `EAST` of the book deposit machine is a grassy knoll; here there is also a first-aid kit, which may be `SEARCH`ed to reveal a sticking plaster and a (useless) empty pill packet.
 
+As soon as the player has visited both the flat and the grassy knoll, an ominous message appears on the newsagent's window:
+
+```
+You are outside a small newsagent's
+shop. The shop is closed. An alley leads
+to the North.
+Directions:
+ North, East & West
+A message has been scrawled in lipstick
+across the shop window!
+:READ MESSAGE
+It says, in blood-red lipstick, 'I'LL BE
+BACK AT MIDDAY!'
+```
+
 The player can now go to the flat, `CHEW GUM` until it is soft and squidgy, and `MEND PIPE`  (using the soft, squidgy gum to plug up the hole in the pipe and wrapping the sticking plaster around to hold it in place while it sets hard)  to complete the third job.
 
-After completing all four tasks, the player has been led to believe the driver from the agency will return to collect them and the game is won .....  But instead, an extra job is discovered on the reverse of the list:
+After completing all four jobs, the player has been led to believe the driver from the agency will return to collect them and the game is won .....  But instead, an extra job is discovered on the reverse of the list:
 
 ```
 Defeat the crazed chainsaw-wielding serial killer who has been terrorising the villagers
@@ -130,7 +145,16 @@ The killer starts from the grassy knoll and chases the player down. If the kille
 
 To complete the game, the player has to return to the child's bedroom and `GET INSIDE BAG`.  The killer will chase the player down and attempt to cut them out of the sleeping bag; whereupon the chainsaw will snag on the polyester fibres, which will melt, gum up the chain and stop the engine with a loud BANG.*  Now disarmed, the killer panics and runs away.  The closing message tells what happened while the player was inside the sleeping bag:
 
-A police officer explains how the killer ran away and tried to hide inside Mrs Partridge's house, where Tiddles was found playing with him! Mr French the newsagent recognised the killer as his tenant! Young Bobby Turtledove now has an excuse to tidy his bedroom. There is no sign of Mr Colley anywhere .....
+```
+A police officer explains how the killer
+ran away and tried to hide inside Mrs
+Partridge's house, where Tiddles was
+found playing with him! Mr French the
+newsagent recognised the killer as his
+tenant! Young Bobby Turtledove now has
+an excuse to tidy his bedroom. There is
+no sign of Mr Colley anywhere .....
+```
 
 ## Ways to Die
 
