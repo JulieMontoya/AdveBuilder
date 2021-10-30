@@ -69,6 +69,14 @@ as follows:
 + `DIRECTION num` -- creates an exit to a given room.
 + `DIRECTION/[RETURN] num` -- creates an exit to a given room, but returning by a different direction.
 
+# mksm
+
+This is a script to generate `stock_messages.6502` from an SQLite3 database.  This
+file has constants for the IDs of the stock messages used by the game engine.
+
+A single parameter is expected, which is the input filename without .sqlite3 extension.
+Output is to STDOUT for easy redirection.
+
 # Older Versions
 
 These are provided for compatibility, so it is still possible to work with older
