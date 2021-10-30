@@ -1,0 +1,32 @@
+\\  BOBAJOB STREET FULL DISC IMAGE GENERATOR
+\\
+
+\\  !BOOT FILE
+
+ORG &8000
+
+._boot_begin
+    EQUS "MODE7"
+    EQUB13
+    EQUS "CH."
+    EQUB34
+    EQUS "INSTRUC"
+    EQUB34
+    EQUB13
+._boot_end
+
+SAVE "!BOOT", _boot_begin, _boot_end
+
+\\  BASIC PROGRAMS
+
+PUTBASIC "instructions.bas", "INSTRUC"
+
+PUTBASIC "bobajob_street.bas", "BOBAJOB"
+
+\\  NPC MAP DATA
+
+INCLUDE "npc_map_data.6502"
+
+\\ GAME
+
+INCLUDE "abengine6.6502"

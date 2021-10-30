@@ -1,0 +1,102 @@
+\\  NON-PLAYER CHARACTER MAP DATA
+\\
+\\  This is a 16*16 array of bytes describing how the chainsaw-wielding
+\\  maniac chases down the player in the endgame sequence.
+\\
+\\  Rows represent killer's current room.
+\\  Columns represent player's current room.
+\\  (when player is in room 16, the sleeping bag, program uses the room
+\\   where the bag is instead .....)
+\\
+\\  Bits 5 and 4 are "nearness" as follows;
+\\    00 => too far away, nothing happens
+\\    01 => engine heard in distance
+\\    10 => engine heard nearby
+\\    11 => killer in same room as player
+\\  Bits 3-0 give the room to which the killer moves next.
+
+ORG &3C00
+
+.npc_map_begin
+    EQUD &60            \  equivalent to RTS
+    EQUD &0
+    EQUD &0
+    EQUD &0
+
+    EQUD &23223100
+    EQUD &3030313
+    EQUD &3030303
+    EQUD &3030303
+
+    EQUD &11322100
+    EQUD &1010101
+    EQUD &1010101
+    EQUD &1010101
+
+    EQUD &33112100
+    EQUD &6060404
+    EQUD &6060606
+    EQUD &6060606
+
+    EQUD &23031300
+    EQUD &3232534
+    EQUD &3030303
+    EQUD &3030303
+
+    EQUD &14040400
+    EQUD &4043524
+    EQUD &4040404
+    EQUD &4040404
+
+    EQUD &23031300
+    EQUD &27360313
+    EQUD &1A2A0717
+    EQUD &A0A0A1A
+
+    EQUD &16060600
+    EQUD &37260606
+    EQUD &6161628
+    EQUD &6060606
+
+    EQUD &7070700
+    EQUD &27170707
+    EQUD &7072938
+    EQUD &7070707
+
+    EQUD &8080800
+    EQUD &18080808
+    EQUD &8083928
+    EQUD &8080808
+
+    EQUD &16060600
+    EQUD &16260606
+    EQUD &2B3A0606
+    EQUD &B1B1B2B
+
+    EQUD &A0A0A00
+    EQUD &A1A0A0A
+    EQUD &3B2A0A0A
+    EQUD &A0A0A1A
+
+    EQUD &A0A0A00
+    EQUD &A1A0A0A
+    EQUD &1A2A0A0A
+    EQUD &1E2E2D3C
+
+    EQUD &C0C0C00
+    EQUD &C0C0C0C
+    EQUD &C1C0C0C
+    EQUD &C1C3D2C
+
+    EQUD &C0C0C00
+    EQUD &C0C0C0C
+    EQUD &C1C0C0C
+    EQUD &2F3E1C2C
+
+    EQUD &E0E0E00
+    EQUD &E0E0E0E
+    EQUD &E0E0E0E
+    EQUD &3F2E0E1E
+.npc_map_end
+
+SAVE "D.NPCMAP",&3C00, &3D00, &3C00
