@@ -15,6 +15,15 @@ Of course, nothing is as it seems.  It wouldn't be much of an adventure if it wa
 
 Bobajob Street was written to test polystate objects, and also introduce the ideas of "container" objects and non-player characters.  It ended up taking a darker turn  ;)
 
+## Building Bobajob Street
+
+Provided you have cloned the whole AdveBuilder repository and so have a `scripts` folder alongside `bobajob_st`, then all you should need to do is run
+
+```
+$ make
+```
+
+to create a disc image, `bobajob_street.ssd` .  
 
 ## Container Logic
 
@@ -25,4 +34,36 @@ The sleeping bag  (where the book is initially hidden)  functions as a container
 Tiddles turns out not to be an ordinary domestic cat, but a large tiger!  The tiger is fairly benign, until he has had his breakfast .....
 
 At the end of the game, a final task is revealed:  Defeat the crazed chainsaw-wielding serial killer who has been terrorising the villagers!  The killer begins from a grassy knoll near the self-service book deposit machine outside the library and chases the player down mercilessly.  The player must hide in the one place a chainsaw cannot cut, and hope the killer does not know .....
+
+# bobajob_st.s3t
+
+This is a text dump file which contains the SQL commands needed to create the SQLite3 database.
+
+# instructions.bas
+
+This is the BASIC program with the instructions for the game.
+
+# bobajob_street.bas
+
+This is the BASIC program with the actual game logic.
+
+# npc_map_data.6502
+
+This is a BeebAsm source file to create the non-player character map data.
+
+# bobajob_street.6502
+
+This is a BeebAsm source file to create a bootable disc image with a !BOOT file, the instructions, the BASIC program for the game, the non-player character map data, the game data and the engine code.
+
+# abengine6.6502
+
+This is the BeebAsm source for the game engine.
+
+# stock_messages.6502
+
+This is a BeebAsm source file with constants for stock messages.  It can be generated from the sqlite database and really needs to be given its own Makefile target.
+
+# Makefile
+
+This is a standard Makefile to build the SSD image.
 
