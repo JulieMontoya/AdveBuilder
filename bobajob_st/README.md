@@ -35,35 +35,37 @@ Tiddles turns out not to be an ordinary domestic cat, but a large tiger!  The ti
 
 At the end of the game, a final task is revealed:  Defeat the crazed chainsaw-wielding serial killer who has been terrorising the villagers!  The killer begins from a grassy knoll near the self-service book deposit machine outside the library and chases the player down mercilessly.  The player must hide in the one place a chainsaw cannot cut, and hope the killer does not know .....
 
-# bobajob_st.s3t
+# Files in bobajob_st
+
+## bobajob_st.s3t
 
 This is a text dump file which contains the SQL commands needed to create the SQLite3 database.
 
-# instructions.bas
+## instructions.bas
 
 This is the BASIC program with the instructions for the game.
 
-# bobajob_street.bas
+## bobajob_street.bas
 
 This is the BASIC program with the actual game logic.
 
-# npc_map_data.6502
+## npc_map_data.6502
 
 This is a BeebAsm source file to create the non-player character map data.
 
-# bobajob_street.6502
+## bobajob_street.6502
 
 This is a BeebAsm source file to create a bootable disc image with a !BOOT file, the instructions, the BASIC program for the game, the non-player character map data, the game data and the engine code.
 
-# abengine6.6502
+## abengine6.6502
 
 This is the BeebAsm source for the game engine.
 
-# stock_messages.6502
+## stock_messages.6502
 
 This is a BeebAsm source file with constants for stock messages.  It can be generated from the sqlite database and really needs to be given its own Makefile target.
 
-# Makefile
+## Makefile
 
 This is a standard Makefile to build the SSD image.
 
