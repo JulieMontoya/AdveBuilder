@@ -6,10 +6,11 @@
 + Add option to generate an object's "in-room" description from its "carried" one.
 + Add a construct for embedding a second message within one being decompressed. For example `There is @ here.` When the uncompressor sees @, save the current uncompressor state [&70-&73], set up the state for the second message, display the second message  (hoping there is no @ sign in it),  restore the state and display the rest of the message.
 + Make `SEARCH` a built-in command  (as we have established a consistent behaviour in _Birthday Adventure_).  Use a table to specify object being `SEARCH`ed, required room (if object is fixed; or 0 if portable, meaning must be in room or carried) to avoid **NOT_HERE**, object to release and controlling state bit (which will be set on releasing the object, with **FOUND**; or gives **EXAM_0SPEC** if this is already set when searching).
-+ Use constants for stock messages, with a tool to take them from the SQLite3 database and export as a .6502 include file, in game engine source code.  **BEGUN** -- buildable code in work area now using this.
-+ Add entry point to read a room's visited flag; and internal subroutines to set and clear same.
++ Use constants for stock messages, with a tool to take them from the SQLite3 database and export as a .6502 include file, in game engine source code.  **BEGUN** -- buildable code in work area now using this. **DONE** with knobs on, because $ was causing problems in Makefile.
++ Add entry point to read a room's visited flag; and internal subroutines to set and clear same. **DONE**
 + Extend database format to include support for short and long descriptions for previously visited and unvisited rooms respectively.
 + **DONE** Make `DIE` a built-in command.  Would not accessed directly by typing a command, but by BASIC program altering `V%`.  Use `M%` to specify dying message, and set `E%`=**GAME_OVER** to satisfy `UNTIL` condition.  DONE -- also added `LIVE` built-in command.
++ Remember last direction moved, to allow `FORWARDS`, `LEFT` and `RIGHT` -- which will take the same direction, next available direction to its left  (counting down)  and next available direction to its right  (counting up)  respectively.
 
 ## Extensions to text uncompression
 
