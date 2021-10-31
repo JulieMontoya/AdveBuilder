@@ -1,0 +1,63 @@
+#!/usr/bin/perl -w
+use strict;
+use constant { TRUE => 1, FALSE => "" };
+use Getopt::Std;
+use Data::Dumper;
+
+################################################################################
+##                                                                            ##
+##  DEDICATED TO THE PUBLIC DOMAIN    2021    BY JULIE KIRSTY LOUISE MONTOYA  ##
+##                                                                            ##
+## USE IT - ABUSE IT - ENJOY IT - DESTROY IT - STUDY IT - SHARE IT - ADAPT IT ##
+##                                                                            ##
+################################################################################
+
+my %OPTIONS;
+getopts "ab:e:i:", \%OPTIONS;
+my $BEGIN_HEX  = $OPTIONS{"b"} // "0000";
+my $END_HEX    = $OPTIONS{"e"} // "FFFF";
+my $IGNORE     = $OPTIONS{"i"} // "^[_`]";
+my $BEEBASM    = $OPTIONS{"a"};
+
+my $begin_addr = hex $BEGIN_HEX;
+my $end_addr   = hex $END_HEX;
+
+my ($label, @label, %label, $hex, $addr, $val);
+
+while ($_ = <>) {
+    if (/^\s*\.([A-Za-z_`][A-Za-z0-9_`]*)/) {
+        $label = $1;
+        # print "Label definition: '$label'\n";
+        push @label, $label             unless $label =~ /$IGNORE/;
+    }
+    elsif (/^\s*([0-9A-Fa-f]{4})/) {
+        $hex = $1;
+        $addr = hex $hex;
+        # print "Address: '$hex' ($addr)\n";
+        if (@label) {
+            foreach (@label) {
+                $label{$_} = $addr;
+            };
+            @label = ();
+        };
+    # }
+    # else {
+    #     print "Other: $_";
+    };
+};
+
+# printf "Going from %d (&%X) to %d (&%X)\n", $begin_addr, $begin_addr, $end_addr, $end_addr;
+
+foreach (sort {$label{$a} <=> $label{$b} || $a cmp $b} keys %label) {
+    $addr = $label{$_};
+    if ($addr >= $begin_addr && $addr < $end_addr) {
+        if ($BEEBASM) {
+            printf "PRINT \"%s =\", ~%s\n", $_, $_;
+        }
+        else {
+            printf "      %s=&%X\n", $_, $addr;
+        };
+    };
+};
+
+exit;
