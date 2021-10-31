@@ -63,9 +63,12 @@ This is the BeebAsm source for the game engine.
 
 ## stock_messages.6502
 
-This is a BeebAsm source file with constants for stock messages.  It can be generated from the sqlite database and really needs to be given its own Makefile target.
+This is a BeebAsm source file with constants for stock messages.  It is generated from the sqlite database with its own Makefile target.
 
 ## Makefile
 
 This is a standard Makefile to build the SSD image.
 
+The Makefile assumes the presence of a `scripts` folder alongside the working folder with `make_huffman_tree`, `pack_database` and `mksm` scripts.  Note, if you alter the .sqlite database, you _must_ dump it as an .s3t file before running `make`, as the database always gets generated from this text dump.
+
+_(Idea for future work: detect whether these tools are already in $PATH and if so, use those in preference)_
