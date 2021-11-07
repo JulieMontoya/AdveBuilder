@@ -15,4 +15,4 @@ bobajob_st_data.6502: bobajob_st.sqlite3
 	../scripts/pack_database5 -q bobajob_st -o bobajob_st_data.6502
 
 clean:
-	rm -f stock_messages.6502 bobajob_st.sqlite3 bobajob_st_data.6502 bobajob_street.ssd
+	rm -f stock_messages.6502 bobajob_st.sqlite3 bobajob_st_data.6502
