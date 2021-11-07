@@ -81,7 +81,7 @@ INSERT INTO verbs VALUES(29,'LIST',16);
 INSERT INTO verbs VALUES(30,'SAVE',17);
 INSERT INTO verbs VALUES(31,'RESTORE',18);
 INSERT INTO verbs VALUES(32,'RESTART',19);
-INSERT INTO verbs VALUES(33,'GO',38);
+INSERT INTO verbs VALUES(33,'GO',0);
 INSERT INTO verbs VALUES(34,'WALK',0);
 INSERT INTO verbs VALUES(35,'SAY',0);
 INSERT INTO verbs VALUES(36,'SEARCH',25);
@@ -105,8 +105,6 @@ INSERT INTO verbs VALUES(53,'STROKE',35);
 INSERT INTO verbs VALUES(54,'PET',35);
 INSERT INTO verbs VALUES(55,'HERE',36);
 INSERT INTO verbs VALUES(56,'KNOCK',37);
-INSERT INTO verbs VALUES(57,'ENTER',38);
-INSERT INTO verbs VALUES(59,'INSIDE',38);
 CREATE TABLE nouns ( seq INTEGER PRIMARY KEY AUTOINCREMENT,
                      noun TEXT NOT NULL DEFAULT '',
                      nn INTEGER NOT NULL DEFAULT 0 );
@@ -391,7 +389,7 @@ INSERT INTO system_messages VALUES(13,'You have nothing suitable.','WITH_WHAT');
 INSERT INTO system_messages VALUES(14,'That would be stealing!','STEALING');
 DELETE FROM sqlite_sequence;
 INSERT INTO sqlite_sequence VALUES('system_messages',14);
-INSERT INTO sqlite_sequence VALUES('verbs',59);
+INSERT INTO sqlite_sequence VALUES('verbs',56);
 INSERT INTO sqlite_sequence VALUES('rooms',16);
 INSERT INTO sqlite_sequence VALUES('decoding_tree',64);
 INSERT INTO sqlite_sequence VALUES('objects',25);
