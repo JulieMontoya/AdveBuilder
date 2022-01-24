@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DB="$1.sqlite3"
+
+echo "SELECT tag,vn FROM verbs WHERE tag>''" | sqlite3 ${DB} \
+| awk -F'|' '{printf "    VB_%-12s = %d\n",$1,$2}'

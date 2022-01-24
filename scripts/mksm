@@ -2,6 +2,5 @@
 
 DB="$1.sqlite3"
 
-echo 'SELECT tag,id FROM system_messages' \
-| sqlite3 bobajob_st.sqlite3 \
+echo 'SELECT tag,id FROM system_messages' | sqlite3 ${DB} \
 | awk -F'|' '{printf "    SM_%-12s = %d\n",$1,$2}'
